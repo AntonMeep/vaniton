@@ -1,0 +1,116 @@
+with "third-party/sparknacl/sparknacl.gpr"; 
+with "third-party/ada-crypto-library/libadacrypt.gpr";
+
+project Vaniton is
+   Source_Directories := (
+      "source/**"
+   );
+   Excluded_Sources := (
+   );
+
+   Global_Switches_Ada := (
+      -- "-gnat2022", -- HOLY SHIT THE FUTURE
+      "-gnatiw", -- Support wide-character codes in identifiers
+      "-gnatW8" -- Utf-8 encoding for wide characters
+   );
+
+   Global_Switches_C := ();
+
+   type Build_Type is ("DEBUG", "RELEASE");
+   Build_Mode : Build_Type := External ("BUILD", "DEBUG");
+
+   type OS_Type is ("Windows_NT", "LINUX");
+   OS : Os_Type := EXTERNAL("OS", "LINUX");
+   case OS is
+      when "Windows_NT" =>
+         
+      when "LINUX" =>
+         
+   end case;
+
+   for Languages use ("Ada");
+
+   for Create_Missing_Dirs use "True";
+   for Source_Dirs use Source_Directories;
+   for Excluded_Source_Files use Excluded_Sources;
+   for Object_Dir use "build";
+   for Exec_Dir use "bin";
+   for Main use ("vaniton.adb");
+
+   package Builder is
+      --
+   end Builder;
+
+   package Compiler is
+      Compiler_Switches_Ada := ();
+      Compiler_Switches_C := ();
+
+      case Build_Mode is
+         when "DEBUG" =>
+            Compiler_Switches_Ada := Compiler_Switches_Ada & (
+               -- "-gnatv", -- Verbose
+               "-gnatU", -- Unique string errors
+               "-gnatQ", -- Force generate ALI files
+               "-gnatwa", -- Activate most optional warnings
+                  "-gnatwd", -- Implicit dereferencing
+                  "-gnatw.d", -- Tag warnings
+                  "-gnatwh", -- Hiding
+                  "-gnatw.h", -- Holes in record layouts
+                  "-gnatw.j", -- Late primitives of tagged types
+                  "-gnatw.k", -- Redefinition of names in standard
+                  "-gnatwl", -- Elaboration warnings
+                  "-gnatw.l", -- Inherited aspects
+                  "-gnatw.n", -- Atomic synchronization
+                  "-gnatwo", -- Address clause overlay
+                  "-gnatw.o", -- Values set by out parameters ignored
+                  "-gnatw.q", -- Questionable layout of record types
+                  "-gnatw_r", -- Out-of-order record representation clauses
+                  "-gnatw.s", -- Overriden size clause
+                  "-gnatwt", -- Tracking of deleted conditional code
+                  "-gnatw.u", -- Unordered enumeration
+                  "-gnatw.w", -- Use of Warnings Off
+                  -- "-gnatw.y", -- Reasons for package needing body
+               "-Wall", -- Most warnings from the GCC back end
+               "-gnata", -- Enable assertions and contracts
+               "-gnatVa", -- All validity checks
+               "-gnatyy", -- Set all standard style check options
+               -- "-gnatE", -- Enable dynamic checks for access-before-elaboration
+               "-fstack-check", -- Enable stack check
+
+               "-g", -- Debug info
+               "-Og" -- No optimization
+            );
+            Compiler_Switches_C := Compiler_Switches_C & (
+               "-g"
+            );
+         when "RELEASE" =>
+            Compiler_Switches_Ada := Compiler_Switches_Ada & (
+               "-O3", -- Optimization
+               "-gnatn" -- Enable inlining
+            );
+            Compiler_Switches_C := Compiler_Switches_C & (
+               "-O3",
+               "-DNDEBUG"
+            );
+      end case;
+
+      for Switches ("Ada") use Global_Switches_Ada & Compiler_Switches_Ada;
+      for Switches ("C") use Global_Switches_C & Compiler_Switches_C;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use (
+         "-Es", -- Symbolic traceback
+         "-static"
+      );
+   end Binder;
+
+   package Naming is
+      --
+   end Naming;
+
+   package Linker is
+      --
+   end Linker;
+end Vaniton;
+

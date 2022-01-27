@@ -1,0 +1,6 @@
+[submodule ".\\third-party\\ada-crypto-library"]
+	path = .\\third-party\\ada-crypto-library
+	url = https://github.com/cforler/Ada-Crypto-Library.git
+[submodule ".\\third-party\\sparknacl"]
+	path = .\\third-party\\sparknacl
+	url = https://github.com/rod-chapman/SPARKNaCl.git
