@@ -13,4 +13,6 @@ package Types is
    function To_Hex_String (Item : in Byte_Array) return String;
    function From_Hex_String (Item : in String) return Byte_Array with
       Pre => (Item'Length mod 2) = 0;
+
+   function CRC16 (Data : Byte_Array) return Unsigned_16;
 end Types;

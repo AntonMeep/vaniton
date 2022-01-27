@@ -71,4 +71,22 @@ package body Types is
 
       return Result;
    end From_Hex_String;
+
+   function CRC16 (Data : Byte_Array) return Unsigned_16 is
+      Result : Unsigned_16 := 0;
+   begin
+      for Byte of Data loop
+         Result := Result xor Shift_Left (Unsigned_16 (Byte), 8);
+
+         for I in 1 .. 8 loop
+            if (Result and Unsigned_16 (16#8000#)) /= 0 then
+               Result := Shift_Left (Result, 1) xor Unsigned_16 (16#1021#);
+            else
+               Result := Shift_Left (Result, 1);
+            end if;
+         end loop;
+      end loop;
+
+      return Result;
+   end CRC16;
 end Types;

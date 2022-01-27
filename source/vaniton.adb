@@ -1,15 +1,16 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Cryptography;
-with Mnemonics;
-with Types; use Types;
+with Addresses;    use Addresses;
+with Cryptography; use Cryptography;
+with Mnemonics;    use Mnemonics;
+with Contracts;    use Contracts;
+with Types;        use Types;
 
 procedure Vaniton is
-
+   V3R1 : WalletV3R1_Contract;
+   Mnm  : Mnemonic := Generate;
+   KP   : Key_Pair := To_Key_Pair (Mnm);
 begin
-   Put_Line (To_Hex_String (Cryptography.HMAC_SHA512 ("mustafa", "carrot")));
-   Put_Line
-     (To_Hex_String
-        (Cryptography.PBKDF2_SHA512
-           (To_Byte_Array ("tutturu"), "blabla", 10)));
+   Create (V3R1, KP.Public_Key);
+   Put_Line (To_String (Get_Address (V3R1)));
 end Vaniton;
