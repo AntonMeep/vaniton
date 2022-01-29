@@ -19,8 +19,13 @@ package body Contracts is
       Workchain :        Integer_8 := 0)
    is
    begin
-      pragma Compile_Time_Warning (Standard.True, "Create unimplemented");
-      raise Program_Error with "Unimplemented procedure Create";
+      This.Code :=
+        From_Bits
+          ("FF0020DD2082014C97BA218201339CBAB19F71B0ED44D0D31FD31F31D70BFFE304E0A4F2608308D71820D31FD31FD31FF82313BBF263ED44D0D31FD31FD3FFD15132BAF2A15144BAF2A204F901541055F910F2A3F8009320D74A96D307D402FB00E8D101A4C8CB1FCB1FCBFFC9ED54");
+      This.Data := Empty_Cell;
+      Write (This.Data, Unsigned_32 (0));
+      Write (This.Data, Unsigned_32 (698_983_191) + Unsigned_32 (Workchain));
+      Write (This.Data, Public_Key);
    end Create;
 
    procedure Create
