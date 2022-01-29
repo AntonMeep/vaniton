@@ -8,7 +8,7 @@ package Contracts is
    type Contract is abstract tagged record
       Code      : aliased Cell;
       Data      : aliased Cell;
-      Workchain : Integer_8;
+      Workchain : Integer_8 := 0;
    end record;
 
    procedure Create

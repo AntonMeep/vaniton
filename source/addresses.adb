@@ -15,9 +15,9 @@ package body Addresses is
       end if;
 
       if This.Bounceable then
-         Tag := Tag and Unsigned_8 (16#11#);
+         Tag := Tag or Unsigned_8 (16#11#);
       else
-         Tag := Tag and Unsigned_8 (16#51#);
+         Tag := Tag or Unsigned_8 (16#51#);
       end if;
       return Tag;
    end Get_Tag;
