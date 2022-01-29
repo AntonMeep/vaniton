@@ -128,7 +128,7 @@ package body Base64 is
                  Encoding_Table
                    (Integer
                       (Shift_Left (Last and Unsigned_8 (16#3#), 4) or
-                       (Shift_Right (Current, 2) and Unsigned_8 (16#F#))));
+                       (Shift_Right (Current, 4) and Unsigned_8 (16#F#))));
             when 2 =>
                Step               := 0;
                Result (Index + 1) :=
