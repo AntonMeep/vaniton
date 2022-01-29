@@ -13,6 +13,9 @@ package Types is
    function To_Byte_Array (Item : in Bit_Array) return Byte_Array;
    function To_Bit_Array (Item : in Byte_Array) return Bit_Array;
 
+   function Padded_Length (Length : in Natural) return Natural;
+   function Pad (Item : in Bit_Array) return Bit_Array;
+
    function To_Hex_String (Item : in Byte_Array) return String;
    function From_Hex_String (Item : in String) return Byte_Array with
       Pre => (Item'Length mod 2) = 0;

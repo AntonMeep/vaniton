@@ -52,6 +52,8 @@ package body Cells is
    end Get_Max_Depth;
 
    function Representation (This : Cell) return Byte_Array is
+      Index : Natural := 1;
+
       Refs_Descriptor : Unsigned_8 :=
         Unsigned_8 (This.Number_Of_References) +
       -- This.Is_Exotic * 8 + -- Completely useless for our purposes
@@ -61,30 +63,42 @@ package body Cells is
         Shift_Left (Unsigned_8 (This.Length / 8), 4) +
         Shift_Right (Unsigned_8 (This.Length / 8), 4);
 
+      Data_Length : Natural := Padded_Length (This.Length) / 8;
+
       Result : Byte_Array
         (1 ..
-             2 + 2 * This.Number_Of_References +
+             2 + Data_Length + 2 * This.Number_Of_References +
              32 * This.Number_Of_References);
    begin
-      Result (1) := Refs_Descriptor;
-      Result (2) := Bits_Descriptor;
+      Result (Index) := Refs_Descriptor;
+      Index          := Index + 1;
+      Result (Index) := Bits_Descriptor;
+      Index          := Index + 1;
 
-      -- Actual data somewhere here
+      declare
+         Padded : Bit_Array (1 .. Padded_Length (This.Length)) :=
+           Pad (This.Bits (1 .. This.Length));
+      begin
+         if Padded'Length /= This.Length then
+            Padded (This.Length + 1) := True;
+         end if;
+         Result (Index .. Index + Data_Length - 1) := To_Byte_Array (Padded);
+         Index                                     := Index + Data_Length;
+      end;
 
       for I in 1 .. This.Number_Of_References loop
          declare
             Max_Depth : Unsigned_16 := Get_Max_Depth (This.References (I).all);
          begin
-            Result (I * 2 + 1) := Unsigned_8 (Max_Depth and 16#FF#);
-            Result (I * 2 + 2) := Unsigned_8 (Shift_Right (Max_Depth, 8));
+            Result (Index)     := Unsigned_8 (Max_Depth and 16#FF#);
+            Result (Index + 1) := Unsigned_8 (Shift_Right (Max_Depth, 8));
+            Index              := Index + 2;
          end;
       end loop;
 
       for I in 1 .. This.Number_Of_References loop
-         Result
-           (1 + 2 + 2 * This.Number_Of_References + (I - 1) * 32 ..
-                2 + 2 * This.Number_Of_References + I * 32) :=
-           Hash (This.References (I).all);
+         Result (Index .. Index + 31) := Hash (This.References (I).all);
+         Index                        := Index + 32;
       end loop;
       return Result;
    end Representation;

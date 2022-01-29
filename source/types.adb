@@ -42,6 +42,17 @@ package body Types is
       return Convert (Item);
    end To_Bit_Array;
 
+   function Padded_Length (Length : in Natural) return Natural is
+     (Natural (Float'Ceiling (Float (Length) / Float (8))) * 8);
+
+   function Pad (Item : in Bit_Array) return Bit_Array is
+      Result : Bit_Array (1 .. Padded_Length (Item'Length)) :=
+        (others => False);
+   begin
+      Result (1 .. Item'Length) := Item;
+      return Result;
+   end Pad;
+
    function To_Hex_String (Item : in Byte_Array) return String is
       To_Hex_Digit : constant array (Unsigned_8 range 0 .. 15) of Character :=
         "0123456789abcdef";
