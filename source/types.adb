@@ -24,22 +24,66 @@ package body Types is
    end To_String;
 
    function To_Byte_Array (Item : in Bit_Array) return Byte_Array is
-      subtype Output_Type is Byte_Array (1 .. Item'Length / 8);
-
-      function Convert is new Ada.Unchecked_Conversion
-        (Bit_Array, Output_Type);
+      Result : Byte_Array (1 .. Item'Length / 8) := (others => 0);
+      Index  : Positive                          := 1;
+      Chunk  : Positive                          := 1;
    begin
       if (Item'Length rem 8) /= 0 then
          raise Program_Error;
       end if;
-      return Convert (Item);
+
+      while Chunk < Item'Length loop
+         Result (Index) :=
+           Unsigned_8 (2#1000_0000#) *
+           Unsigned_8 (if Item (Chunk) then 1 else 0) +
+           Unsigned_8 (2#0100_0000#) *
+             Unsigned_8 (if Item (Chunk + 1) then 1 else 0) +
+           Unsigned_8 (2#0010_0000#) *
+             Unsigned_8 (if Item (Chunk + 2) then 1 else 0) +
+           Unsigned_8 (2#0001_0000#) *
+             Unsigned_8 (if Item (Chunk + 3) then 1 else 0) +
+           Unsigned_8 (2#0000_1000#) *
+             Unsigned_8 (if Item (Chunk + 4) then 1 else 0) +
+           Unsigned_8 (2#0000_0100#) *
+             Unsigned_8 (if Item (Chunk + 5) then 1 else 0) +
+           Unsigned_8 (2#0000_0010#) *
+             Unsigned_8 (if Item (Chunk + 6) then 1 else 0) +
+           Unsigned_8 (2#0000_0001#) *
+             Unsigned_8 (if Item (Chunk + 7) then 1 else 0);
+
+         Index := Index + 1;
+         Chunk := Chunk + 8;
+      end loop;
+
+      return Result;
    end To_Byte_Array;
+
    function To_Bit_Array (Item : in Byte_Array) return Bit_Array is
-      subtype Output_Type is Bit_Array (1 .. Item'Length * 8);
-      function Convert is new Ada.Unchecked_Conversion
-        (Byte_Array, Output_Type);
+      Result : Bit_Array (1 .. Item'Length * 8) := (others => False);
+
+      Chunk : Positive := 1;
    begin
-      return Convert (Item);
+      for Byte of Item loop
+         Result (Chunk + 0) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#1000_0000#)) /= 0;
+         Result (Chunk + 1) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0100_0000#)) /= 0;
+         Result (Chunk + 2) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0010_0000#)) /= 0;
+         Result (Chunk + 3) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0001_0000#)) /= 0;
+         Result (Chunk + 4) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_1000#)) /= 0;
+         Result (Chunk + 5) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_0100#)) /= 0;
+         Result (Chunk + 6) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_0010#)) /= 0;
+         Result (Chunk + 7) :=
+           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_0001#)) /= 0;
+         Chunk := Chunk + 8;
+      end loop;
+
+      return Result;
    end To_Bit_Array;
 
    function Padded_Length (Length : in Natural) return Natural is

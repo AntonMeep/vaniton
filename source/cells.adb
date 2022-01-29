@@ -60,15 +60,16 @@ package body Cells is
       Get_Max_Level (This) * 32; -- Also does nothing, always 0
 
       Bits_Descriptor : Unsigned_8 :=
-        Shift_Left (Unsigned_8 (This.Length / 8), 4) +
-        Shift_Right (Unsigned_8 (This.Length / 8), 4);
+        Unsigned_8 (Float'Ceiling (Float (This.Length) / Float (8))) +
+        Unsigned_8 (Float'Floor (Float (This.Length) / Float (8)));
 
       Data_Length : Natural := Padded_Length (This.Length) / 8;
 
       Result : Byte_Array
         (1 ..
              2 + Data_Length + 2 * This.Number_Of_References +
-             32 * This.Number_Of_References);
+             32 * This.Number_Of_References) :=
+        (others => 0);
    begin
       Result (Index) := Refs_Descriptor;
       Index          := Index + 1;

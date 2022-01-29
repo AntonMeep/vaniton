@@ -25,10 +25,10 @@ private
    type Cell_Access_Array is array (Positive range 1 .. 4) of Cell_Access;
 
    type Cell is record
-      Bits                 : Bit_Array (1 .. 1_023);
-      Length               : Natural := 0;
+      Bits                 : Bit_Array (1 .. 1_023) := (others => False);
+      Length               : Natural                := 0;
       References           : Cell_Access_Array;
-      Number_Of_References : Natural := 0;
+      Number_Of_References : Natural                := 0;
    end record;
 
    Empty_Cell : constant Cell :=
