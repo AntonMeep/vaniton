@@ -1,4 +1,5 @@
 {
     "ada.defaultCharset": "utf-8",
-    "ada.projectFile": "vaniton.gpr"
+    "ada.projectFile": "vaniton.gpr",
+    "files.eol": "\n"
 }
