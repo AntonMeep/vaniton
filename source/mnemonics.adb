@@ -1,3 +1,4 @@
+with Ada.Strings.Fixed;
 with Interfaces; use Interfaces;
 
 package body Mnemonics is
@@ -29,7 +30,25 @@ package body Mnemonics is
       return Result;
    end Generate;
 
-   function Join (This : Mnemonic) return String is
+   function From_String (Input : String) return Mnemonic is
+      use Ada.Strings.Fixed;
+      use Words.Bounded_Words;
+
+      Result  : Mnemonic (1 .. Count (Input, " ") + 1);
+      Current : Positive := 1;
+   begin
+      for I in Input'Range loop
+         if Input (I) = ' ' then
+            Current := Current + 1;
+         else
+            Append (Result (Current), Input (I));
+         end if;
+      end loop;
+
+      return Result;
+   end From_String;
+
+   function To_String (This : Mnemonic) return String is
       use Words.Bounded_Words;
       Phrase_Length : Positive := This'Length - 1;
    begin
@@ -53,11 +72,11 @@ package body Mnemonics is
          end loop;
          return Result;
       end;
-   end Join;
+   end To_String;
 
    function To_Entropy
      (This : Mnemonic; Password : String := "") return Byte_Array is
-     (HMAC_SHA512 (Join (This), Password));
+     (HMAC_SHA512 (To_String (This), Password));
 
    function To_Seed
      (This : Mnemonic; Password : String := "") return Byte_Array is

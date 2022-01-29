@@ -19,6 +19,8 @@ package Cells is
    procedure Write (This : in out Cell; Data : Bit_Array);
    procedure Write (This : in out Cell; Data : Byte_Array);
    procedure Write (This : in out Cell; Data : Unsigned_32);
+
+   function Bits (This : in Cell) return Bit_Array;
 private
    type Cell_Access_Array is array (Positive range 1 .. 4) of Cell_Access;
 

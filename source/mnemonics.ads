@@ -8,6 +8,8 @@ package Mnemonics is
    function Generate
      (Words_Count : Positive := 24; Password : String := "";
       List        : Wordlist := English_Words) return Mnemonic;
+   function From_String (Input : String) return Mnemonic;
+   function To_String (This : Mnemonic) return String;
    function To_Entropy
      (This : Mnemonic; Password : String := "") return Byte_Array;
    function To_Seed

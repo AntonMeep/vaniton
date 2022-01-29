@@ -140,4 +140,7 @@ package body Cells is
    begin
       Write (This, Convert (Data));
    end Write;
+
+   function Bits (This : in Cell) return Bit_Array is
+     (This.Bits (1 .. This.Length));
 end Cells;
