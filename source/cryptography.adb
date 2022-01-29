@@ -1,6 +1,7 @@
 with Ada.Unchecked_Conversion;
 with Interfaces; use Interfaces;
 
+with Crypto.Symmetric.Algorithm.SHA256;
 with Crypto.Symmetric.Algorithm.SHA512;
 with Crypto.Symmetric.KDF_PBKDF2;
 with Crypto.Symmetric.Mac.Hmac_SHA512;
@@ -83,6 +84,24 @@ package body Cryptography is
       Derive (Scheme, To_Bytes (Salt), To_Bytes (Key), Result);
       return To_Byte_Array (Result);
    end PBKDF2_SHA512;
+
+   function SHA256 (Data : Byte_Array) return Byte_Array is
+      use Crypto.Symmetric.Algorithm.SHA256;
+      use Crypto.Types;
+
+      subtype Input_Bytes is Bytes (1 .. Data'Length);
+      function To_Bytes is new Ada.Unchecked_Conversion
+        (Byte_Array, Input_Bytes);
+
+      subtype Output_Type is Byte_Array (1 .. 32);
+      function To_Byte_Array is new Ada.Unchecked_Conversion
+        (Bytes, Output_Type);
+
+      Result : W_Block256;
+   begin
+      Hash (To_Bytes (Data), Result);
+      return To_Byte_Array (To_Bytes (Result));
+   end SHA256;
 
    function From_Seed (Seed : Byte_Array) return Key_Pair is
       use SPARKNaCl.Sign;

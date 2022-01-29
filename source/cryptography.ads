@@ -12,6 +12,8 @@ package Cryptography is
      (Key : Byte_Array; Salt : String; Iterations : Positive)
       return Byte_Array;
 
+   function SHA256 (Data : Byte_Array) return Byte_Array;
+
    function From_Seed (Seed : Byte_Array) return Key_Pair;
 
    procedure Get_Random_Values (Result : out Unsigned_32_Array);

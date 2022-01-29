@@ -41,10 +41,12 @@ package body Contracts is
          True, -- data
          False -- library
       );
+
    begin
       Write (State_Init, State_Init_Array);
-      Append_Reference (State_Init, This.Code'Access);
-      Append_Reference (State_Init, This.Data'Access);
+      Append_Reference
+        (State_Init, This.Code'Unchecked_Access); -- Live fast, use Unchecked_
+      Append_Reference (State_Init, This.Data'Unchecked_Access);
 
       declare
          State_Init_Hash : Byte_Array := Hash (State_Init);
