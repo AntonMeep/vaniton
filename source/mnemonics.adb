@@ -46,7 +46,7 @@ package body Mnemonics is
                Result (I) := Element (Word, C);
                I          := I + 1;
             end loop;
-            if I /= Phrase_Length then
+            if I < Phrase_Length then
                Result (I) := ' ';
                I          := I + 1;
             end if;

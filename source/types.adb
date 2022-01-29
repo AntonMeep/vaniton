@@ -1,4 +1,7 @@
 pragma Ada_2012;
+
+with Ada.Unchecked_Conversion;
+
 package body Types is
    function To_Byte_Array (Item : in String) return Byte_Array is
       Result : Byte_Array (Item'First .. Item'Last);
@@ -19,6 +22,25 @@ package body Types is
 
       return Result;
    end To_String;
+
+   function To_Byte_Array (Item : in Bit_Array) return Byte_Array is
+      subtype Output_Type is Byte_Array (1 .. Item'Length / 8);
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Bit_Array, Output_Type);
+   begin
+      if (Item'Length rem 8) /= 0 then
+         raise Program_Error;
+      end if;
+      return Convert (Item);
+   end To_Byte_Array;
+   function To_Bit_Array (Item : in Byte_Array) return Bit_Array is
+      subtype Output_Type is Bit_Array (1 .. Item'Length * 8);
+      function Convert is new Ada.Unchecked_Conversion
+        (Byte_Array, Output_Type);
+   begin
+      return Convert (Item);
+   end To_Bit_Array;
 
    function To_Hex_String (Item : in Byte_Array) return String is
       To_Hex_Digit : constant array (Unsigned_8 range 0 .. 15) of Character :=
@@ -71,6 +93,11 @@ package body Types is
 
       return Result;
    end From_Hex_String;
+
+   function To_Hex_String (Item : in Bit_Array) return String is
+     (To_Hex_String (To_Byte_Array (Item)));
+   function From_Hex_String (Item : in String) return Bit_Array is
+     (To_Bit_Array (From_Hex_String (Item)));
 
    function CRC16 (Data : Byte_Array) return Unsigned_16 is
       Result : Unsigned_16 := 0;

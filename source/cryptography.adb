@@ -1,6 +1,7 @@
 with Ada.Unchecked_Conversion;
 with Interfaces; use Interfaces;
 
+with Crypto.Symmetric.Algorithm.SHA512;
 with Crypto.Symmetric.KDF_PBKDF2;
 with Crypto.Symmetric.Mac.Hmac_SHA512;
 with Crypto.Types;
@@ -21,8 +22,12 @@ package body Cryptography is
 
    function HMAC_SHA512 (Phrase : String; Password : String) return Byte_Array
    is
+      use Crypto.Symmetric.Algorithm.SHA512;
       use Crypto.Symmetric.Mac.Hmac_SHA512;
       use Crypto.Types;
+
+      Phrase_Bytes : Bytes := To_Bytes (Phrase);
+      Key          : DW_Block1024;
 
       Context      : HMAC_Context;
       Result       : DW_Block512;
@@ -33,7 +38,18 @@ package body Cryptography is
       function To_Byte_Array is new Ada.Unchecked_Conversion
         (Bytes, Output_Byte_Array);
    begin
-      Init (Context, To_DW_Block1024 (Pad (To_Bytes (Phrase), 128)));
+      if Phrase_Bytes'Length > 128 then
+         declare
+            Key_Small : DW_Block512;
+         begin
+            Hash (Phrase_Bytes, Key_Small);
+            Key := To_DW_Block1024 (Pad (To_Bytes (Key_Small), 128));
+         end;
+      else
+         Key := To_DW_Block1024 (Pad (Phrase_Bytes, 128));
+      end if;
+
+      Init (Context, Key);
       Final_Sign
         (Context, To_DW_Block1024 (Pad (To_Bytes (Password), 128)),
          Password'Length, Result);
@@ -111,10 +127,10 @@ package body Cryptography is
         (Entropy, "TON seed version",
          Natural'Max
            (1, Natural (Float'Floor (Float (PBKDF_ITERATIONS) / 256.0))))
-        (0) =
+        (1) =
       0);
    function Is_Password_Seed (Entropy : Byte_Array) return Boolean is
-     (PBKDF2_SHA512 (Entropy, "TON fast seed version", 1) (0) = 1);
+     (PBKDF2_SHA512 (Entropy, "TON fast seed version", 1) (1) = 1);
    function Is_Password_Needed (Entropy : Byte_Array) return Boolean is
      (Is_Password_Seed (Entropy) and not Is_Basic_Seed (Entropy));
 end Cryptography;

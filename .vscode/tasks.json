@@ -2,15 +2,24 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "gprbuild",
-			"projectFile": "${config:ada.projectFile}",
 			"problemMatcher": [
 				"$ada"
 			],
+			"type": "process",
+			"command": "gprbuild.exe",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
+			"presentation": {
+				"reveal": "always"
+			},
+			"args": [
+				"-P${config:ada.projectFile}",
+				"-XBUILD=DEBUG",
+				"-Xsystem=windows",
+				"-j0"
+			],
 			"label": "Build vaniton",
 		}
 	]

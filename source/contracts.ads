@@ -6,8 +6,8 @@ with Types;     use Types;
 
 package Contracts is
    type Contract is abstract tagged record
-      Code      : Cell;
-      Data      : Cell;
+      Code      : aliased Cell;
+      Data      : aliased Cell;
       Workchain : Integer_8;
    end record;
 

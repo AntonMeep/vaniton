@@ -6,10 +6,13 @@ package Cells is
    type Cell is private;
    Empty_Cell : constant Cell;
 
-   function From_BoC (Data : String) return Cell;
-   function From_BoC (Data : Byte_Array) return Cell;
+   function From_Bits (Data : String) return Cell;
+   function From_Bits (Data : Bit_Array) return Cell;
    function Representation (This : Cell) return Byte_Array;
    function Hash (This : Cell) return Byte_Array;
+
+   procedure Append_Reference
+     (This : in out Cell; Other : not null access Cell);
 
    procedure Write (This : in out Cell; Data : Cell);
    procedure Write (This : in out Cell; Data : Bit_Array);

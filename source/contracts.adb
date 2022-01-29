@@ -6,8 +6,8 @@ package body Contracts is
    is
    begin
       This.Code :=
-        From_BoC
-          ("B5EE9C724101010100620000C0FF0020DD2082014C97BA9730ED44D0D70B1FE0A4F2608308D71820D31FD31FD31FF82313BBF263ED44D0D31FD31FD3FFD15132BAF2A15144BAF2A204F901541055F910F2A3F8009320D74A96D307D402FB00E8D101A4C8CB1FCB1FCBFFC9ED543FBE6EE0");
+        From_Bits
+          ("FF0020DD2082014C97BA9730ED44D0D70B1FE0A4F2608308D71820D31FD31FD31FF82313BBF263ED44D0D31FD31FD3FFD15132BAF2A15144BAF2A204F901541055F910F2A3F8009320D74A96D307D402FB00E8D101A4C8CB1FCB1FCBFFC9ED54");
       This.Data := Empty_Cell;
       Write (This.Data, Unsigned_32 (0));
       Write (This.Data, Unsigned_32 (698_983_191) + Unsigned_32 (Workchain));
@@ -43,8 +43,8 @@ package body Contracts is
       );
    begin
       Write (State_Init, State_Init_Array);
-      Write (State_Init, This.Code);
-      Write (State_Init, This.Data);
+      Append_Reference (State_Init, This.Code'Access);
+      Append_Reference (State_Init, This.Data'Access);
 
       declare
          State_Init_Hash : Byte_Array := Hash (State_Init);
