@@ -27,8 +27,13 @@ package body Addresses is
 
       function Convert is new Ada.Unchecked_Conversion
         (Unsigned_16, Output_Type);
+
+      Buffer : Output_Type := Convert (CRC16 (Data));
+      Swap   : Output_Type;
    begin
-      return Convert (CRC16 (Data));
+      Swap (1) := Buffer (2);
+      Swap (2) := Buffer (1);
+      return Swap;
    end CRC16;
 
    function CRC16 (Data : Address) return Byte_Array is

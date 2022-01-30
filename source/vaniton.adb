@@ -46,6 +46,11 @@ begin
 
    Put_Line ("");
    Put_Line
+     ("Original code cell hash  : 84dafa449f98a6987789ba232358072bc0f76dc4524002a5d0918b9a75d2d599");
+   Put_Line ("Calculated code cell hash: " & To_Hex_String (Hash (V3R2.Code)));
+
+   Put_Line ("");
+   Put_Line
      ("Original account address  : EQDIpYGcfw8r36TYPhfa3kyErKDFrFFHAvjizYekZsNsuBVb");
    Put_Line ("Calculated account address: " & To_String (Get_Address (V3R2)));
 end Vaniton;
