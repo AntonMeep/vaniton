@@ -9,18 +9,73 @@ with Contracts;    use Contracts;
 with Types;        use Types;
 
 procedure Vaniton is
+   My_Mnemonic_Phrase : String :=
+     "describe mimic shop crowd fat wire toe grid street submit grow play history depth modify bomb jeans icon enforce horse super sting tilt radio";
 
+   My_Mnemonic : Mnemonic := From_String (My_Mnemonic_Phrase);
+   My_Key_Pair : Key_Pair := To_Key_Pair (My_Mnemonic);
 begin
-   while True loop
-      declare
-         Phrase          : Mnemonic := Generate;
-         Keys            : Key_Pair := To_Key_Pair (Phrase);
-         Wallet_Contract : WalletV3R2_Contract;
-      begin
-         Create (Wallet_Contract, Keys.Public_Key, 0);
-         Put_Line
-           (To_String (Get_Address (Wallet_Contract)) & "|" &
-            To_String (Phrase));
-      end;
-   end loop;
+   Put_Line
+     ("Simple_R1: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_Simple_R1))));
+   Put_Line
+     ("Simple_R2: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_Simple_R2))));
+   Put_Line
+     ("Simple_R3: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_Simple_R3))));
+   Put_Line
+     ("V2_R1: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_V2_R1))));
+   Put_Line
+     ("V2_R2: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_V2_R2))));
+   Put_Line
+     ("V3_R1: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_V3_R1))));
+   Put_Line
+     ("V3_R2: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_V3_R2))));
+   Put_Line
+     ("V4_R1: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_V4_R1))));
+   Put_Line
+     ("V4_R2: " &
+      To_String
+        (Get_Address
+           (Create
+              (Public_Key => My_Key_Pair.Public_Key,
+               Kind       => Wallet_Contract_V4_R2))));
 end Vaniton;
