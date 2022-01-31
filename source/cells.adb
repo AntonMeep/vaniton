@@ -129,7 +129,7 @@ package body Cells is
                   for L in reverse 1 .. Positive (Data_Bytes_Size) * 8 loop
                      if cells_array (I).C.all.Bits (L) then
                         cells_array (I).C.all.Bits (L) := False;
-                        cells_array (I).C.all.Length   := I;
+                        cells_array (I).C.all.Length   := L-1;
                         exit;
                      end if;
                   end loop;
