@@ -7,8 +7,14 @@ package Cells is
    type Cell_Access is access all Cell;
    Empty_Cell : constant Cell;
 
+   Cell_Error : exception;
+
    function From_Bits (Data : String) return Cell;
    function From_Bits (Data : Bit_Array) return Cell;
+
+   function From_BoC (Data : String) return Cell;
+   function From_BoC (Data : Byte_Array) return Cell;
+
    function Representation (This : Cell) return Byte_Array;
    function Hash (This : Cell) return Byte_Array;
 

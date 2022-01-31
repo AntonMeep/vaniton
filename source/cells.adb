@@ -1,5 +1,7 @@
 pragma Ada_2012;
 
+with Ada.Containers;
+with Ada.Containers.Bounded_Vectors;
 with Ada.Unchecked_Conversion;
 
 with Cryptography;
@@ -15,6 +17,153 @@ package body Cells is
       Result.Length                  := Data'Length;
       return Result;
    end From_Bits;
+
+   function From_BoC (Data : String) return Cell is
+     (From_BoC (From_Hex_String (Data)));
+
+   function From_BoC (Data : Byte_Array) return Cell is
+      Magic : constant Byte_Array (1 .. 4) := From_Hex_String ("b5ee9c72");
+
+      Index : Positive := 1;
+
+      has_idx, hash_crc32, has_cache_bits : Boolean    := False;
+      flags, size_bytes, offset_bytes     : Unsigned_8 := 0;
+
+      cells_num, roots_num, absent_num, tot_cells_size : Unsigned_32;
+
+      function Read_NBytes
+        (A : Byte_Array; I : Positive; N : Unsigned_8) return Unsigned_32
+      is
+         R : Unsigned_32 := 0;
+      begin
+         for B of A (I .. I + Positive (N) - 1) loop
+            R := R * 256;
+            R := R + Unsigned_32 (B);
+         end loop;
+         return R;
+      end Read_NBytes;
+   begin
+      if Data (1 .. 4) /= Magic then
+         raise Cell_Error with "Invalid magic number";
+      end if;
+      Index := Index + 4;
+
+      has_idx        := (Data (Index) and 128) /= 0;
+      hash_crc32     := (Data (Index) and 64) /= 0;
+      has_cache_bits := (Data (Index) and 32) /= 0;
+      flags          := (Data (Index) and 16) * 2 + (Data (Index) and 8);
+      size_bytes     := Data (Index) rem 8;
+      Index          := Index + 1;
+
+      offset_bytes   := Data (Index);
+      Index          := Index + 1;
+      cells_num      := Read_NBytes (Data, Index, size_bytes);
+      Index          := Index + Positive (size_bytes);
+      roots_num      := Read_NBytes (Data, Index, size_bytes);
+      Index          := Index + Positive (size_bytes);
+      absent_num     := Read_NBytes (Data, Index, size_bytes);
+      Index          := Index + Positive (size_bytes);
+      tot_cells_size := Read_NBytes (Data, Index, offset_bytes);
+      Index          := Index + Positive (offset_bytes);
+
+      declare
+         type Root_List_Type is array (Positive range <>) of Unsigned_32;
+         root_list : Root_List_Type (1 .. Positive (roots_num));
+
+         type Index_List_Type is array (Positive range <>) of Unsigned_32;
+         index_list : Index_List_Type (1 .. Positive (cells_num));
+
+         cells_data : Byte_Array (1 .. Positive (tot_cells_size));
+
+         package Reference_Vectors is new Ada.Containers.Bounded_Vectors
+           (Positive, Unsigned_32);
+         use Reference_Vectors;
+
+         type Cell_Definition is record
+            C : Cell_Access := new Cell'(Empty_Cell);
+            R : Reference_Vectors.Vector (4);
+         end record;
+
+         type Cells_Array_Type is array (Positive range <>) of Cell_Definition;
+         cells_array : Cells_Array_Type (1 .. Positive (cells_num));
+
+         Cells_Data_Index : Positive := 1;
+      begin
+         for I in 1 .. Positive (roots_num) loop
+            root_list (I) := Read_NBytes (Data, Index, size_bytes);
+            Index         := Index + Positive (size_bytes);
+         end loop;
+
+         if has_idx then
+            for I in 1 .. Positive (cells_num) loop
+               index_list (I) := Read_NBytes (Data, Index, offset_bytes);
+               Index          := Index + Positive (offset_bytes);
+            end loop;
+         end if;
+
+         cells_data := Data (Index .. Index + Positive (tot_cells_size) - 1);
+         Index      := Index + Positive (tot_cells_size);
+
+         for I in 1 .. Positive (cells_num) loop
+            declare
+               D1 : Unsigned_8 := cells_data (Cells_Data_Index);
+               D2 : Unsigned_8 := cells_data (Cells_Data_Index + 1);
+
+               Reference_Number : Unsigned_8 := D1 rem 8;
+               Data_Bytes_Size  : Unsigned_8 :=
+                 Unsigned_8 (Float'Ceiling (Float (D2) / Float (2)));
+               Fullfilled_Bytes : Boolean := (D2 rem 2) = 0;
+            begin
+               Cells_Data_Index := Cells_Data_Index + 2;
+
+               cells_array (I).C.all.Bits
+                 (1 .. Positive (Data_Bytes_Size) * 8) :=
+                 To_Bit_Array
+                   (cells_data
+                      (Cells_Data_Index ..
+                           Cells_Data_Index + Positive (Data_Bytes_Size) - 1));
+               if Fullfilled_Bytes then
+                  cells_array (I).C.all.Length :=
+                    Natural (Data_Bytes_Size) * 8;
+               else
+                  for L in reverse 1 .. Positive (Data_Bytes_Size) * 8 loop
+                     if cells_array (I).C.all.Bits (L) then
+                        cells_array (I).C.all.Bits (L) := False;
+                        cells_array (I).C.all.Length   := I;
+                        exit;
+                     end if;
+                  end loop;
+               end if;
+               Cells_Data_Index :=
+                 Cells_Data_Index + Positive (Data_Bytes_Size);
+
+               for L in 1 .. Reference_Number loop
+                  cells_array (I).R.Append
+                    (Read_NBytes (cells_data, Cells_Data_Index, size_bytes));
+                  Cells_Data_Index := Cells_Data_Index + Positive (size_bytes);
+               end loop;
+            end;
+         end loop;
+
+         for I in reverse 1 .. Positive (cells_num) loop
+            for R of cells_array (I).R loop
+               Append_Reference
+                 (cells_array (I).C.all, cells_array (Integer (R) + 1).C);
+            end loop;
+         end loop;
+
+         if hash_crc32 then
+            -- todo we actually don't check shit here
+            Index := Index + 4;
+         end if;
+
+         if Index /= Data'Length + 1 then
+            raise Cell_Error with "Too much data for BoC deserialization";
+         end if;
+
+         return cells_array (1).C.all;
+      end;
+   end From_BoC;
 
    function Get_Max_Level (This : Cell) return Unsigned_8 is
       Max_Level : Unsigned_8 := 0;
