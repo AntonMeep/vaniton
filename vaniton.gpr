@@ -78,7 +78,7 @@ project Vaniton is
                "-fstack-check", -- Enable stack check
 
                "-g", -- Debug info
-               "-Og" -- No optimization
+               "-O0" -- No optimization
             );
             Compiler_Switches_C := Compiler_Switches_C & (
                "-g"
