@@ -129,7 +129,7 @@ package body Cells is
                   for L in reverse 1 .. Positive (Data_Bytes_Size) * 8 loop
                      if cells_array (I).C.all.Bits (L) then
                         cells_array (I).C.all.Bits (L) := False;
-                        cells_array (I).C.all.Length   := L-1;
+                        cells_array (I).C.all.Length   := L - 1;
                         exit;
                      end if;
                   end loop;
@@ -240,8 +240,9 @@ package body Cells is
          declare
             Max_Depth : Unsigned_16 := Get_Max_Depth (This.References (I).all);
          begin
-            Result (Index)     := Unsigned_8 (Max_Depth and 16#FF#);
-            Result (Index + 1) := Unsigned_8 (Shift_Right (Max_Depth, 8));
+            Result (Index) :=
+              Unsigned_8 (Float'Floor (Float (Max_Depth) / Float (256)));
+            Result (Index + 1) := Unsigned_8 (Max_Depth rem 256);
             Index              := Index + 2;
          end;
       end loop;
