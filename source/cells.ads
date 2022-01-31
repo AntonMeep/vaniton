@@ -25,6 +25,7 @@ package Cells is
    procedure Write (This : in out Cell; Data : Bit_Array);
    procedure Write (This : in out Cell; Data : Byte_Array);
    procedure Write (This : in out Cell; Data : Unsigned_32);
+   procedure Write (This : in out Cell; Data : Boolean);
 
    function Bits (This : in Cell) return Bit_Array;
 private

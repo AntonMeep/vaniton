@@ -298,6 +298,12 @@ package body Cells is
       Write (This, Swap);
    end Write;
 
+   procedure Write (This : in out Cell; Data : Boolean) is
+   begin
+      This.Bits (This.Length + 1) := Data;
+      This.Length                 := This.Length + 1;
+   end Write;
+
    function Bits (This : in Cell) return Bit_Array is
      (This.Bits (1 .. This.Length));
 end Cells;
