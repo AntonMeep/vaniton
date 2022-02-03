@@ -10,6 +10,7 @@ package Mnemonics is
       List        : Wordlist := English_Words) return Mnemonic;
    function From_String (Input : String) return Mnemonic;
    function To_String (This : Mnemonic) return String;
+   function Is_Valid(This : Mnemonic; Password : String := ""; List : Wordlist := English_Words) return Boolean;
    function To_Entropy
      (This : Mnemonic; Password : String := "") return Byte_Array;
    function To_Seed

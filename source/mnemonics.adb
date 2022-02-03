@@ -1,4 +1,6 @@
+with Ada.Numerics.Discrete_Random;
 with Ada.Strings.Fixed;
+
 with Interfaces; use Interfaces;
 
 package body Mnemonics is
@@ -6,26 +8,34 @@ package body Mnemonics is
      (Words_Count : Positive := 24; Password : String := "";
       List        : Wordlist := English_Words) return Mnemonic
    is
-      Result : Mnemonic (1 .. Words_Count);
-      Random : Unsigned_32_Array (1 .. Words_Count);
-   begin
-      <<Try_Again>>
-      Get_Random_Values (Random);
-      for I in Result'Range loop
-         Result (I) := List (Natural (Random (I) and Unsigned_32 (List'Last)));
-      end loop;
+      package Random_Package is new Ada.Numerics.Discrete_Random(Natural);
+      use Random_Package;
 
-      declare
-         Entropy : constant Byte_Array := To_Entropy (Result, Password);
+      Result : Mnemonic (1 .. Words_Count);
+      Random_Generator : Generator;
+
+      function Check_Validity return Boolean is
+         Entropy : constant Byte_Array := To_Entropy (Result);
       begin
          if Password'Length > 0 and then not Is_Password_Needed (Entropy) then
-            goto Try_Again;
+            return False;
          end if;
 
-         if not Is_Basic_Seed (Entropy) then
-            goto Try_Again;
-         end if;
-      end;
+         return Is_Basic_Seed (Entropy);
+      end Check_Validity;
+   begin
+      Reset(Random_Generator);
+      loop
+         for I in Result'Range loop
+            Result (I) := List (Random(Random_Generator, List'First, List'Last));
+         end loop;
+
+         exit when Check_Validity;
+      end loop;
+
+      if not Is_Valid (Result, Password, List) then
+         raise Program_Error; -- Debugging only
+      end if;
 
       return Result;
    end Generate;
@@ -73,6 +83,37 @@ package body Mnemonics is
          return Result;
       end;
    end To_String;
+
+   function Is_Valid(This : Mnemonic; Password : String := ""; List : Wordlist := English_Words) return Boolean is
+   begin
+      for Word of This loop
+         declare
+            use Words.Bounded_Words;
+            Found : Boolean := False;
+         begin
+            for List_Word of List loop
+               if Word = List_Word then
+                  Found := True;
+               end if;
+               exit when Found;
+            end loop;
+
+            if not Found then
+               return False;
+            end if;
+         end;
+      end loop;
+
+      declare
+         Entropy : constant Byte_Array := To_Entropy (This, Password);
+      begin
+         if Password'Length > 0 and then not Is_Password_Needed (Entropy) then
+            return False;
+         end if;
+
+         return Is_Basic_Seed (Entropy);
+      end;
+   end Is_Valid;
 
    function To_Entropy
      (This : Mnemonic; Password : String := "") return Byte_Array is

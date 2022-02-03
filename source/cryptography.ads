@@ -16,8 +16,6 @@ package Cryptography is
 
    function From_Seed (Seed : Byte_Array) return Key_Pair;
 
-   procedure Get_Random_Values (Result : out Unsigned_32_Array);
-
    function Is_Basic_Seed (Entropy : Byte_Array) return Boolean;
    function Is_Password_Seed (Entropy : Byte_Array) return Boolean;
    function Is_Password_Needed (Entropy : Byte_Array) return Boolean;

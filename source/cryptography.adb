@@ -128,19 +128,6 @@ package body Cryptography is
       return Result;
    end From_Seed;
 
-   procedure Get_Random_Values (Result : out Unsigned_32_Array) is
-      use Crypto.Types;
-      use Crypto.Types.Random;
-      Value : Word;
-
-      function Convert is new Ada.Unchecked_Conversion (Word, Unsigned_32);
-   begin
-      for I in Result'Range loop
-         Read (Value);
-         Result (I) := Convert (Value);
-      end loop;
-   end Get_Random_Values;
-
    function Is_Basic_Seed (Entropy : Byte_Array) return Boolean is
      (PBKDF2_SHA512
         (Entropy, "TON seed version",
