@@ -1,5 +1,4 @@
-with "third-party/sparknacl/sparknacl.gpr"; 
-with "third-party/ada-crypto-library/libadacrypt.gpr";
+with "third-party/sparknacl/sparknacl.gpr";
 
 project Vaniton is
    Source_Directories := (

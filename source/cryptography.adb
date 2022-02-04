@@ -1,14 +1,10 @@
 with Ada.Unchecked_Conversion;
+with Ada.Streams;
 with Interfaces; use Interfaces;
 with Interfaces.C;
 
-with Crypto.Symmetric.Algorithm.SHA256;
-with Crypto.Symmetric.Algorithm.SHA512;
-with Crypto.Symmetric.KDF_PBKDF2;
-with Crypto.Symmetric.Mac.Hmac_SHA512;
-with Crypto.Types;
-with Crypto.Types.Random;
-with Crypto.Types.Base64;
+with GNAT.SHA256; use GNAT.SHA256;
+
 with SPARKNaCl.Sign;
 with SPARKNaCl;
 
@@ -16,14 +12,6 @@ with fastpbkdf2_h; use fastpbkdf2_h;
 with hmac_sha_c;
 
 package body Cryptography is
-   function Pad
-     (Item : Crypto.Types.Bytes; Target : Natural) return Crypto.Types.Bytes
-   is
-      Result : Crypto.Types.Bytes (1 .. Target) := (others => 0);
-   begin
-      Result (1 .. Item'Length) := Item;
-      return Result;
-   end Pad;
 
    function HMAC_SHA512 (Phrase : String; Password : String) return Byte_Array
    is
@@ -67,21 +55,17 @@ package body Cryptography is
    end PBKDF2_SHA512;
 
    function SHA256 (Data : Byte_Array) return Byte_Array is
-      use Crypto.Symmetric.Algorithm.SHA256;
-      use Crypto.Types;
+      use Ada.Streams;
 
-      subtype Input_Bytes is Bytes (1 .. Data'Length);
-      function To_Bytes is new Ada.Unchecked_Conversion
-        (Byte_Array, Input_Bytes);
+      subtype Buffer_Type is Stream_Element_Array (1 .. Data'Length);
+      function To_Stream_Element_Array is new Ada.Unchecked_Conversion
+        (Byte_Array, Buffer_Type);
 
       subtype Output_Type is Byte_Array (1 .. 32);
-      function To_Byte_Array is new Ada.Unchecked_Conversion
-        (Bytes, Output_Type);
-
-      Result : W_Block256;
+      function To_Output is new Ada.Unchecked_Conversion
+        (Stream_Element_Array, Output_Type);
    begin
-      Hash (To_Bytes (Data), Result);
-      return To_Byte_Array (To_Bytes (Result));
+      return To_Output (Digest (To_Stream_Element_Array (Data)));
    end SHA256;
 
    function From_Seed (Seed : Byte_Array) return Key_Pair is

@@ -17,7 +17,6 @@
 			"args": [
 				"-P${config:ada.projectFile}",
 				"-XBUILD=DEBUG",
-				"-Xsystem=windows",
 				"-j0"
 			],
 			"label": "Build vaniton",
