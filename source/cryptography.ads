@@ -1,3 +1,5 @@
+with Interfaces; use Interfaces;
+
 with Types; use Types;
 
 package Cryptography is
@@ -19,4 +21,6 @@ package Cryptography is
    function Is_Basic_Seed (Entropy : Byte_Array) return Boolean;
    function Is_Password_Seed (Entropy : Byte_Array) return Boolean;
    function Is_Password_Needed (Entropy : Byte_Array) return Boolean;
+
+   function Get_Random return Unsigned_32;
 end Cryptography;

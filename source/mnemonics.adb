@@ -1,4 +1,3 @@
-with Ada.Numerics.Discrete_Random;
 with Ada.Strings.Fixed;
 
 with Interfaces; use Interfaces;
@@ -8,11 +7,7 @@ package body Mnemonics is
      (Words_Count : Positive := 24; Password : String := "";
       List        : Wordlist := English_Words) return Mnemonic
    is
-      package Random_Package is new Ada.Numerics.Discrete_Random (Natural);
-      use Random_Package;
-
-      Result           : Mnemonic (1 .. Words_Count);
-      Random_Generator : Generator;
+      Result : Mnemonic (1 .. Words_Count);
 
       function Check_Validity return Boolean is
          Entropy : constant Byte_Array := To_Entropy (Result);
@@ -24,11 +19,10 @@ package body Mnemonics is
          return Is_Basic_Seed (Entropy);
       end Check_Validity;
    begin
-      Reset (Random_Generator);
       loop
          for I in Result'Range loop
             Result (I) :=
-              List (Random (Random_Generator, List'First, List'Last));
+              List (Natural (Get_Random and Unsigned_32 (List'Last)));
          end loop;
 
          exit when Check_Validity;
