@@ -1,81 +1,38 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with GNAT.Command_Line; use GNAT.Command_Line;
+with Ada.Text_IO;       use Ada.Text_IO;
 
-with Addresses;    use Addresses;
-with Base64;       use Base64;
-with Cells;        use Cells;
-with Cryptography; use Cryptography;
-with Mnemonics;    use Mnemonics;
-with Contracts;    use Contracts;
-with Types;        use Types;
+with Workers; use Workers;
 
 procedure Vaniton is
-   My_Mnemonic_Phrase : String :=
-     "describe mimic shop crowd fat wire toe grid street submit grow play history depth modify bomb jeans icon enforce horse super sting tilt radio";
+   Config            : Command_Line_Configuration;
+   Number_Of_Workers : aliased Integer;
 
-   My_Mnemonic : Mnemonic := From_String (My_Mnemonic_Phrase);
-   My_Key_Pair : Key_Pair := To_Key_Pair (My_Mnemonic);
+   type Worker_Array_Type is array (Natural range <>) of Worker;
+   Worker_Array : access Worker_Array_Type;
+   The_Matcher  : Matcher;
 begin
-   Put_Line
-     ("Simple_R1: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_Simple_R1))));
-   Put_Line
-     ("Simple_R2: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_Simple_R2))));
-   Put_Line
-     ("Simple_R3: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_Simple_R3))));
-   Put_Line
-     ("V2_R1: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_V2_R1))));
-   Put_Line
-     ("V2_R2: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_V2_R2))));
-   Put_Line
-     ("V3_R1: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_V3_R1))));
-   Put_Line
-     ("V3_R2: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_V3_R2))));
-   Put_Line
-     ("V4_R1: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_V4_R1))));
-   Put_Line
-     ("V4_R2: " &
-      To_String
-        (Get_Address
-           (Create
-              (Public_Key => My_Key_Pair.Public_Key,
-               Kind       => Wallet_Contract_V4_R2))));
+   Define_Switch
+     (Config, Number_Of_Workers'Access, "-w:", "--workers=",
+      "Number of working threads running in parallel", Initial => 1);
+
+   Getopt (Config);
+
+   Worker_Array :=
+     new Worker_Array_Type (0 .. Natural (Number_Of_Workers) - 1);
+   for I in Worker_Array.all'Range loop
+      Worker_Array.all (I).Start;
+   end loop;
+   The_Matcher.Start;
+
+   declare
+      Key       : Character;
+      Available : Boolean;
+   begin
+      while True loop
+         Ada.Text_IO.Get_Immediate (Key, Available);
+         exit when Available;
+      end loop;
+   end;
+
+   Control.Signal_Stop;
 end Vaniton;
