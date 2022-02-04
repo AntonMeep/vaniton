@@ -8,10 +8,10 @@ package body Mnemonics is
      (Words_Count : Positive := 24; Password : String := "";
       List        : Wordlist := English_Words) return Mnemonic
    is
-      package Random_Package is new Ada.Numerics.Discrete_Random(Natural);
+      package Random_Package is new Ada.Numerics.Discrete_Random (Natural);
       use Random_Package;
 
-      Result : Mnemonic (1 .. Words_Count);
+      Result           : Mnemonic (1 .. Words_Count);
       Random_Generator : Generator;
 
       function Check_Validity return Boolean is
@@ -24,10 +24,11 @@ package body Mnemonics is
          return Is_Basic_Seed (Entropy);
       end Check_Validity;
    begin
-      Reset(Random_Generator);
+      Reset (Random_Generator);
       loop
          for I in Result'Range loop
-            Result (I) := List (Random(Random_Generator, List'First, List'Last));
+            Result (I) :=
+              List (Random (Random_Generator, List'First, List'Last));
          end loop;
 
          exit when Check_Validity;
@@ -84,7 +85,10 @@ package body Mnemonics is
       end;
    end To_String;
 
-   function Is_Valid(This : Mnemonic; Password : String := ""; List : Wordlist := English_Words) return Boolean is
+   function Is_Valid
+     (This : Mnemonic; Password : String := "";
+      List : Wordlist := English_Words) return Boolean
+   is
    begin
       for Word of This loop
          declare

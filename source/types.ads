@@ -3,7 +3,7 @@ with Interfaces; use Interfaces;
 package Types is
    type Bit_Array is array (Natural range <>) of Boolean;
    pragma Pack (Bit_Array);
-   type Byte_Array is array (Natural range <>) of Unsigned_8;
+   type Byte_Array is array (Natural range <>) of aliased Unsigned_8;
 
    type Unsigned_32_Array is array (Natural range <>) of Unsigned_32;
 

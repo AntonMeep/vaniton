@@ -3,9 +3,13 @@ with "third-party/ada-crypto-library/libadacrypt.gpr";
 
 project Vaniton is
    Source_Directories := (
-      "source/**"
+      "source/**",
+      "third-party/fastpbkdf2"
    );
    Excluded_Sources := (
+      "bench.c",
+      "benchmulti.c",
+      "testfastpbkdf2.c"
    );
 
    Global_Switches_Ada := (
@@ -28,7 +32,7 @@ project Vaniton is
          
    end case;
 
-   for Languages use ("Ada");
+   for Languages use ("Ada", "C");
 
    for Create_Missing_Dirs use "True";
    for Source_Dirs use Source_Directories;
@@ -110,7 +114,7 @@ project Vaniton is
    end Naming;
 
    package Linker is
-      --
+      for Required_Switches use ("-lcrypto");
    end Linker;
 end Vaniton;
 

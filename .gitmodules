@@ -4,3 +4,6 @@
 [submodule ".\\third-party\\sparknacl"]
 	path = .\\third-party\\sparknacl
 	url = https://github.com/rod-chapman/SPARKNaCl.git
+[submodule ".\\third-party\\fastpbkdf2"]
+	path = .\\third-party\\fastpbkdf2
+	url = https://github.com/ctz/fastpbkdf2.git

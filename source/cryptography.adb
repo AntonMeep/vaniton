@@ -1,5 +1,6 @@
 with Ada.Unchecked_Conversion;
 with Interfaces; use Interfaces;
+with Interfaces.C;
 
 with Crypto.Symmetric.Algorithm.SHA256;
 with Crypto.Symmetric.Algorithm.SHA512;
@@ -10,6 +11,9 @@ with Crypto.Types.Random;
 with Crypto.Types.Base64;
 with SPARKNaCl.Sign;
 with SPARKNaCl;
+
+with fastpbkdf2_h; use fastpbkdf2_h;
+with hmac_sha_c;
 
 package body Cryptography is
    function Pad
@@ -23,66 +27,43 @@ package body Cryptography is
 
    function HMAC_SHA512 (Phrase : String; Password : String) return Byte_Array
    is
-      use Crypto.Symmetric.Algorithm.SHA512;
-      use Crypto.Symmetric.Mac.Hmac_SHA512;
-      use Crypto.Types;
+      use Interfaces.C;
 
-      Phrase_Bytes : Bytes := To_Bytes (Phrase);
-      Key          : DW_Block1024;
+      Phrase_Bytes   : aliased Byte_Array := To_Byte_Array (Phrase);
+      Password_Bytes : aliased Byte_Array := To_Byte_Array (Password);
 
-      Context      : HMAC_Context;
-      Result       : DW_Block512;
-      Result_Bytes : Bytes (1 .. 64);
-
-      subtype Output_Byte_Array is Byte_Array (1 .. 64);
-
-      function To_Byte_Array is new Ada.Unchecked_Conversion
-        (Bytes, Output_Byte_Array);
+      Result : aliased Byte_Array (1 .. 64);
    begin
-      if Phrase_Bytes'Length > 128 then
-         declare
-            Key_Small : DW_Block512;
-         begin
-            Hash (Phrase_Bytes, Key_Small);
-            Key := To_DW_Block1024 (Pad (To_Bytes (Key_Small), 128));
-         end;
-      else
-         Key := To_DW_Block1024 (Pad (Phrase_Bytes, 128));
+      if Password'Length /= 0 then
+         Password_Bytes := To_Byte_Array (Password);
       end if;
 
-      Init (Context, Key);
-      Final_Sign
-        (Context, To_DW_Block1024 (Pad (To_Bytes (Password), 128)),
-         Password'Length, Result);
-      Result_Bytes := To_Bytes (Result);
-      return To_Byte_Array (Result_Bytes);
+      if not hmac_sha_c.hmac_sha512
+          (Phrase_Bytes (Phrase_Bytes'First)'Access, Phrase_Bytes'Length,
+           (if Password'Length /= 0 then
+              Password_Bytes (Password_Bytes'First)'Access
+            else null),
+           Password'Length, Result (1)'Access, Result'Length)
+      then
+         raise Program_Error;
+      end if;
+
+      return Result;
    end HMAC_SHA512;
 
    function PBKDF2_SHA512
      (Key : Byte_Array; Salt : String; Iterations : Positive) return Byte_Array
    is
-      use Crypto.Types;
+      Salt_Bytes : aliased Byte_Array := To_Byte_Array (Salt);
+      Key_Copy   : aliased Byte_Array := Key;
 
-      package PBKDF2 is new Crypto.Symmetric.KDF_PBKDF2
-        (Hmac_Package    => Crypto.Symmetric.Mac.Hmac_SHA512,
-         To_Message_Type => To_DW_Block1024, To_Bytes => To_Bytes,
-         "xor"           => "xor");
-      use PBKDF2;
-
-      Scheme : PBKDF2_KDF;
-      Result : Bytes (1 .. 64);
-
-      subtype Input_Bytes is Bytes (1 .. Key'Length);
-      function To_Bytes is new Ada.Unchecked_Conversion
-        (Byte_Array, Input_Bytes);
-
-      subtype Output_Byte_Array is Byte_Array (1 .. 64);
-      function To_Byte_Array is new Ada.Unchecked_Conversion
-        (Bytes, Output_Byte_Array);
+      Result : aliased Byte_Array (1 .. 64);
    begin
-      Initialize (Scheme, Result'Length, Iterations);
-      Derive (Scheme, To_Bytes (Salt), To_Bytes (Key), Result);
-      return To_Byte_Array (Result);
+      fastpbkdf2_hmac_sha512
+        (Key_Copy (Key_Copy'First)'Access, Key_Copy'Length,
+         Salt_Bytes (Salt_Bytes'First)'Access, Salt_Bytes'Length,
+         Unsigned_32 (Iterations), Result (1)'Access, Result'Length);
+      return Result;
    end PBKDF2_SHA512;
 
    function SHA256 (Data : Byte_Array) return Byte_Array is
