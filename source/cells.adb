@@ -80,7 +80,9 @@ package body Cells is
          use Reference_Vectors;
 
          type Cell_Definition is record
-            C : Cell_Access := new Cell'(Empty_Cell);
+            C : Cell_Access :=
+              new Cell'(Empty_Cell); -- TODO: Memory leaks everywhere
+            -- Gotta find a way to destroy unreferenced and unused cells
             R : Reference_Vectors.Vector (4);
          end record;
 
