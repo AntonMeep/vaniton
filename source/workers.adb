@@ -3,7 +3,6 @@ pragma Ada_2012;
 with Ada.Text_IO;
 
 with Addresses;
-with Contracts;
 with Cryptography;
 
 package body Workers is
@@ -18,13 +17,15 @@ package body Workers is
 
    task body Worker is
       Current : Work_Unit;
+      Kind    : Wallet_Contract;
    begin
-      accept Start;
+      accept Start (Wallet_Kind : Wallet_Contract) do
+         Kind := Wallet_Kind;
+      end Start;
 
       while not Control.Stop loop
          Current.Phrase := Generate;
          declare
-            use Contracts;
             use Cryptography;
 
             KP : constant Key_Pair := To_Key_Pair (Current.Phrase);
@@ -32,9 +33,7 @@ package body Workers is
             Current.Address :=
               Addresses.To_String
                 (Get_Address
-                   (Create
-                      (Public_Key => KP.Public_Key,
-                       Kind       => Wallet_Contract_V3_R2)));
+                   (Create (Public_Key => KP.Public_Key, Kind => Kind)));
          end;
 
          Work_Queue.Enqueue (Current);

@@ -11,7 +11,8 @@ package hmac_sha_c is
    function hmac_sha512
      (key : access Unsigned_8; key_len : size_t; message : access Unsigned_8;
       message_length : size_t; c_out : access Unsigned_8; nout : size_t)
-      return Extensions.bool  -- .\source\hmac_sha.c:6
+      return Extensions
+     .bool  -- .\source\hmac_sha.c:6
    with
       Import        => True,
       Convention    => C,

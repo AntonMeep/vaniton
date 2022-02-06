@@ -1,5 +1,6 @@
 with Ada.Unchecked_Conversion;
 with Ada.Streams;
+with Interfaces.C;
 with Interfaces.C.Extensions;
 
 with GNAT.SHA256; use GNAT.SHA256;
@@ -14,6 +15,7 @@ package body Cryptography is
 
    function HMAC_SHA512 (Phrase : String; Password : String) return Byte_Array
    is
+      use Interfaces.C;
       use Interfaces.C.Extensions;
 
       Phrase_Bytes   : aliased Byte_Array := To_Byte_Array (Phrase);
