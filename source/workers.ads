@@ -34,6 +34,6 @@ package Workers is
    end Worker;
 
    task type Matcher is
-      entry Start;
+      entry Start (Pattern : String; Case_Sensitive : Boolean);
    end Matcher;
 end Workers;

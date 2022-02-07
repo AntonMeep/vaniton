@@ -12,6 +12,8 @@ procedure Vaniton is
    Number_Of_Workers  : aliased Integer;
    Wallet_Kind_String : aliased String_Access := new String'("V3_R2");
    Wallet_Kind        : Wallets.Wallet_Kind;
+   Pattern            : aliased String_Access := new String'("");
+   Case_Sensitive     : aliased Boolean       := False;
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
    Worker_Array : access Worker_Array_Type;
@@ -23,6 +25,12 @@ begin
    Define_Switch
      (Config, Wallet_Kind_String'Access, "-w:", "--wallet=",
       "Wallet version to use (default: V3_R2)");
+   Define_Switch
+     (Config, Pattern'Access, "-p:", "--pattern=",
+      "Pattern to match against (default: '' = match all)");
+   Define_Switch
+     (Config, Case_Sensitive'Access, "-c", "--case-sensitive",
+      "Match case-sensitive (default: false)");
 
    Getopt (Config);
 
@@ -33,7 +41,7 @@ begin
    for I in Worker_Array.all'Range loop
       Worker_Array.all (I).Start (Wallet_Kind);
    end loop;
-   The_Matcher.Start;
+   The_Matcher.Start (Pattern.all, Case_Sensitive);
 
    declare
       Key       : Character;

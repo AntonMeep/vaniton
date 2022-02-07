@@ -1,6 +1,8 @@
 pragma Ada_2012;
 
+with Ada.Containers; use Ada.Containers;
 with Ada.Text_IO;
+with GNAT.Regexp;
 
 with Addresses;
 with Cryptography;
@@ -42,14 +44,22 @@ package body Workers is
 
    task body Matcher is
       use Ada.Text_IO;
+      use GNAT.Regexp;
 
-      Current : Work_Unit;
+      Current    : Work_Unit;
+      Expression : Regexp;
    begin
-      accept Start;
+      accept Start (Pattern : String; Case_Sensitive : Boolean) do
+         Expression := Compile (Pattern, False, Case_Sensitive);
 
-      while not Control.Stop loop
+      end Start;
+
+      while (not Control.Stop) or else (Work_Queue.Current_Use /= 0) loop
          Work_Queue.Dequeue (Current);
-         Put_Line (Current.Address & "|" & To_String (Current.Phrase));
+
+         if Match (Current.Address, Expression) then
+            Put_Line (Current.Address & "|" & To_String (Current.Phrase));
+         end if;
       end loop;
    end Matcher;
 
