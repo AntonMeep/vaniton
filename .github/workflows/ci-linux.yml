@@ -22,6 +22,15 @@ jobs:
       with:
         distrib: community
     
-    - name: Build vaniton
+    - name: Build release
       run: >
-        gprbuild -P vaniton.gpr -XBUILD=DEBUG -j0
+        gprbuild -P vaniton.gpr -XBUILD=RELEASE -j0
+    
+    - name: Upload binaries
+      uses: actions/upload-artifact@v2
+      with:
+        name: vaniton-bin-linux.zip
+        path: |
+          bin/vaniton
+          README.md
+          LICENSE.txt

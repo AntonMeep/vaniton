@@ -1,0 +1,46 @@
+name: CI windows
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: CI on Windows
+
+    runs-on: windows-2022
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install toolchain
+      uses: ada-actions/toolchain@ce2021
+      with:
+        distrib: community
+    
+    - name: Install OpenSSL on MSYS2
+      run: |
+        C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-openssl
+        Copy-Item -Path "C:\msys64\mingw64\include\openssl" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\x86_64-w64-mingw32\include" -Recurse
+        Copy-Item "C:\msys64\mingw64\lib\libssl.*" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\lib"
+        Copy-Item "C:\msys64\mingw64\lib\libcrypto.*" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\lib"
+        mkdir bin
+        Copy-Item "C:\msys64\mingw64\bin\libcrypto-1_1-x64.dll" -Destination "bin"
+
+    - name: Build release
+      run: >
+        gprbuild -P vaniton.gpr -XBUILD=RELEASE -j0
+    
+    - name: Upload binaries
+      uses: actions/upload-artifact@v2
+      with:
+        name: vaniton-bin-windows.zip
+        path: |
+          bin/vaniton.exe
+          bin/libcrypto-1_1-x64.dll
+          README.md
+          LICENSE.txt
