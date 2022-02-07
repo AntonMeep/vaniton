@@ -2,7 +2,7 @@ with Ada.Containers;
 with Ada.Containers.Bounded_Synchronized_Queues;
 with Ada.Containers.Synchronized_Queue_Interfaces;
 
-with Contracts; use Contracts;
+with Wallets;
 with Mnemonics; use Mnemonics;
 
 package Workers is
@@ -30,7 +30,7 @@ package Workers is
    end Control;
 
    task type Worker is
-      entry Start (Wallet_Kind : Wallet_Contract);
+      entry Start (Wallet_Kind : Wallets.Wallet_Kind);
    end Worker;
 
    task type Matcher is

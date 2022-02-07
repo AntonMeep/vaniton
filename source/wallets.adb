@@ -1,5 +1,8 @@
 pragma Ada_2012;
-package body Contracts is
+
+with Cells; use Cells;
+
+package body Wallets is
    Wallet_Code_Simple_R1 : constant Cell :=
      From_BoC
        ("B5EE9C72410101010044000084FF0020DDA4F260810200D71820D70B1FED44D0D31FD3FFD15112BAF2A122F901541044F910F2A2F80001D31F3120D74A96D307D402FB00DED1A4C8CB1FCBFFC9ED5441FDF089");
@@ -35,82 +38,68 @@ package body Contracts is
      From_BoC
        ("B5EE9C72410214010002D4000114FF00F4A413F4BCF2C80B010201200203020148040504F8F28308D71820D31FD31FD31F02F823BBF264ED44D0D31FD31FD3FFF404D15143BAF2A15151BAF2A205F901541064F910F2A3F80024A4C8CB1F5240CB1F5230CBFF5210F400C9ED54F80F01D30721C0009F6C519320D74A96D307D402FB00E830E021C001E30021C002E30001C0039130E30D03A4C8CB1F12CB1FCBFF1011121302E6D001D0D3032171B0925F04E022D749C120925F04E002D31F218210706C7567BD22821064737472BDB0925F05E003FA403020FA4401C8CA07CBFFC9D0ED44D0810140D721F404305C810108F40A6FA131B3925F07E005D33FC8258210706C7567BA923830E30D03821064737472BA925F06E30D06070201200809007801FA00F40430F8276F2230500AA121BEF2E0508210706C7567831EB17080185004CB0526CF1658FA0219F400CB6917CB1F5260CB3F20C98040FB0006008A5004810108F45930ED44D0810140D720C801CF16F400C9ED540172B08E23821064737472831EB17080185005CB055003CF1623FA0213CB6ACB1FCB3FC98040FB00925F03E20201200A0B0059BD242B6F6A2684080A06B90FA0218470D4080847A4937D29910CE6903E9FF9837812801B7810148987159F31840201580C0D0011B8C97ED44D0D70B1F8003DB29DFB513420405035C87D010C00B23281F2FFF274006040423D029BE84C600201200E0F0019ADCE76A26840206B90EB85FFC00019AF1DF6A26840106B90EB858FC0006ED207FA00D4D422F90005C8CA0715CBFFC9D077748018C8CB05CB0222CF165005FA0214CB6B12CCCCC973FB00C84014810108F451F2A7020070810108D718FA00D33FC8542047810108F451F2A782106E6F746570748018C8CB05CB025006CF165004FA0214CB6A12CB1FCB3FC973FB0002006C810108D718FA00D33F305224810108F459F2A782106473747270748018C8CB05CB025005CF165003FA0213CB6ACB1F12CB3FC973FB00000AF400C9ED54696225E5");
 
-   function Create
+   function Get_Wallet_Address
      (Public_Key : Byte_Array; Workchain : Integer_8 := 0;
-      Kind       : Wallet_Contract := V3_R2) return Contract
+      Kind       : Wallet_Kind := V3_R2) return Address
    is
-      Result : Contract;
-   begin
-      Result.Kind      := Kind;
-      Result.Workchain := Workchain;
+      Result : Address;
 
-      case Result.Kind is
-         when Simple_R1 =>
-            Result.Code := Wallet_Code_Simple_R1;
-         when Simple_R2 =>
-            Result.Code := Wallet_Code_Simple_R2;
-         when Simple_R3 =>
-            Result.Code := Wallet_Code_Simple_R3;
-         when V2_R1 =>
-            Result.Code := Wallet_Code_V2_R1;
-         when V2_R2 =>
-            Result.Code := Wallet_Code_V2_R2;
-         when V3_R1 =>
-            Result.Code := Wallet_Code_V3_R1;
-         when V3_R2 =>
-            Result.Code := Wallet_Code_V3_R2;
-         when V4_R1 =>
-            Result.Code := Wallet_Code_V4_R1;
-         when V4_R2 =>
-            Result.Code := Wallet_Code_V4_R2;
-      end case;
+      Code : aliased Cell;
+      Data : aliased Cell := Empty_Cell;
 
-      case Result.Kind is
-         when Simple_R1 | Simple_R2 | Simple_R3 | V2_R1 | V2_R2 =>
-            Result.Data := Empty_Cell;
-            Write (Result.Data, Unsigned_32 (0));
-            Write (Result.Data, Public_Key);
-         when V3_R1 | V3_R2 =>
-            Result.Data := Empty_Cell;
-            Write (Result.Data, Unsigned_32 (0));
-            Write
-              (Result.Data,
-               Unsigned_32 (698_983_191 + Integer (Result.Workchain)));
-            Write (Result.Data, Public_Key);
-         when V4_R1 | V4_R2 =>
-            Write (Result.Data, Unsigned_32 (0));
-            Write
-              (Result.Data,
-               Unsigned_32 (698_983_191 + Integer (Result.Workchain)));
-            Write (Result.Data, Public_Key);
-            Write (Result.Data, False);
-      end case;
-
-      return Result;
-   end Create;
-
-   function Get_Address (This_Original : in Contract) return Address is
-      This : Contract := This_Original;
-
-      State_Init       : Cell               := Empty_Cell;
-      State_Init_Array : Bit_Array (1 .. 5) :=
+      State_Init       : Cell                        := Empty_Cell;
+      State_Init_Array : constant Bit_Array (1 .. 5) :=
         (False, -- split depth
          False, -- tick tock
          True, -- code
          True, -- data
          False -- library
       );
-
    begin
+      case Kind is
+         when Simple_R1 =>
+            Code := Wallet_Code_Simple_R1;
+         when Simple_R2 =>
+            Code := Wallet_Code_Simple_R2;
+         when Simple_R3 =>
+            Code := Wallet_Code_Simple_R3;
+         when V2_R1 =>
+            Code := Wallet_Code_V2_R1;
+         when V2_R2 =>
+            Code := Wallet_Code_V2_R2;
+         when V3_R1 =>
+            Code := Wallet_Code_V3_R1;
+         when V3_R2 =>
+            Code := Wallet_Code_V3_R2;
+         when V4_R1 =>
+            Code := Wallet_Code_V4_R1;
+         when V4_R2 =>
+            Code := Wallet_Code_V4_R2;
+      end case;
+
+      case Kind is
+         when Simple_R1 | Simple_R2 | Simple_R3 | V2_R1 | V2_R2 =>
+            Write (Data, Unsigned_32 (0));
+            Write (Data, Public_Key);
+         when V3_R1 | V3_R2 =>
+            Data := Empty_Cell;
+            Write (Data, Unsigned_32 (0));
+            Write (Data, Unsigned_32 (698_983_191 + Integer (Workchain)));
+            Write (Data, Public_Key);
+         when V4_R1 | V4_R2 =>
+            Write (Data, Unsigned_32 (0));
+            Write (Data, Unsigned_32 (698_983_191 + Integer (Workchain)));
+            Write (Data, Public_Key);
+            Write (Data, False);
+      end case;
+
       Write (State_Init, State_Init_Array);
       Append_Reference
-        (State_Init, This.Code'Unchecked_Access); -- Live fast, use Unchecked_
-      Append_Reference (State_Init, This.Data'Unchecked_Access);
+        (State_Init, Code'Unchecked_Access); -- Live fast, use Unchecked_
+      Append_Reference (State_Init, Data'Unchecked_Access);
 
-      declare
-         State_Init_Hash : Byte_Array := Hash (State_Init);
-      begin
-         return Create (False, True, This.Workchain, State_Init_Hash);
-      end;
-   end Get_Address;
-end Contracts;
+      Result := Create (False, True, Workchain, Hash (State_Init));
+
+      return Result;
+   end Get_Wallet_Address;
+end Wallets;

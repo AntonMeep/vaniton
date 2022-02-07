@@ -17,9 +17,9 @@ package body Workers is
 
    task body Worker is
       Current : Work_Unit;
-      Kind    : Wallet_Contract;
+      Kind    : Wallets.Wallet_Kind;
    begin
-      accept Start (Wallet_Kind : Wallet_Contract) do
+      accept Start (Wallet_Kind : Wallets.Wallet_Kind) do
          Kind := Wallet_Kind;
       end Start;
 
@@ -32,8 +32,8 @@ package body Workers is
          begin
             Current.Address :=
               Addresses.To_String
-                (Get_Address
-                   (Create (Public_Key => KP.Public_Key, Kind => Kind)));
+                (Wallets.Get_Wallet_Address
+                   (Public_Key => KP.Public_Key, Kind => Kind));
          end;
 
          Work_Queue.Enqueue (Current);

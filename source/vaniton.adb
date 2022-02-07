@@ -4,14 +4,14 @@ with Ada.Text_IO;             use Ada.Text_IO;
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;      use GNAT.Strings;
 
-with Contracts; use Contracts;
-with Workers;   use Workers;
+with Wallets;
+with Workers; use Workers;
 
 procedure Vaniton is
    Config             : Command_Line_Configuration;
    Number_Of_Workers  : aliased Integer;
    Wallet_Kind_String : aliased String_Access := new String'("V3_R2");
-   Wallet_Kind        : Wallet_Contract;
+   Wallet_Kind        : Wallets.Wallet_Kind;
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
    Worker_Array : access Worker_Array_Type;
@@ -26,7 +26,7 @@ begin
 
    Getopt (Config);
 
-   Wallet_Kind := Wallet_Contract'Value (Wallet_Kind_String.all);
+   Wallet_Kind := Wallets.Wallet_Kind'Value (Wallet_Kind_String.all);
 
    Worker_Array :=
      new Worker_Array_Type (0 .. Natural (Number_Of_Workers) - 1);
