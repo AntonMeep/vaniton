@@ -14,10 +14,11 @@ procedure Vaniton is
    Wallet_Kind        : Wallets.Wallet_Kind;
    Pattern            : aliased String_Access := new String'("");
    Case_Sensitive     : aliased Boolean       := False;
+   Log_File           : aliased String_Access := new String'("");
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
    Worker_Array : access Worker_Array_Type;
-   The_Matcher  : Matcher;
+   The_Writer   : Writer;
 begin
    Define_Switch
      (Config, Number_Of_Workers'Access, "-t:", "--threads=",
@@ -31,6 +32,9 @@ begin
    Define_Switch
      (Config, Case_Sensitive'Access, "-c", "--case-sensitive",
       "Match case-sensitive (default: false)");
+   Define_Switch
+     (Config, Log_File'Access, "-l:", "--log=",
+      "Log file to write found phrases to (default: "" = none)");
 
    Getopt (Config);
 
@@ -39,9 +43,9 @@ begin
    Worker_Array :=
      new Worker_Array_Type (0 .. Natural (Number_Of_Workers) - 1);
    for I in Worker_Array.all'Range loop
-      Worker_Array.all (I).Start (Wallet_Kind);
+      Worker_Array.all (I).Start (Wallet_Kind, Pattern.all, Case_Sensitive);
    end loop;
-   The_Matcher.Start (Pattern.all, Case_Sensitive);
+   The_Writer.Start (Log_File.all);
 
    declare
       Key       : Character;

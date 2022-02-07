@@ -18,11 +18,18 @@ package body Workers is
    end Control;
 
    task body Worker is
-      Current : Work_Unit;
-      Kind    : Wallets.Wallet_Kind;
+      use GNAT.Regexp;
+
+      Current    : Work_Unit;
+      Kind       : Wallets.Wallet_Kind;
+      Expression : Regexp;
    begin
-      accept Start (Wallet_Kind : Wallets.Wallet_Kind) do
-         Kind := Wallet_Kind;
+      accept Start
+        (Wallet_Kind    : Wallets.Wallet_Kind; Pattern : String;
+         Case_Sensitive : Boolean)
+      do
+         Kind       := Wallet_Kind;
+         Expression := Compile (Pattern, False, Case_Sensitive);
       end Start;
 
       while not Control.Stop loop
@@ -38,29 +45,43 @@ package body Workers is
                    (Public_Key => KP.Public_Key, Kind => Kind));
          end;
 
-         Work_Queue.Enqueue (Current);
+         if Match (Current.Address, Expression) then
+            Work_Queue.Enqueue (Current);
+         end if;
       end loop;
    end Worker;
 
-   task body Matcher is
+   task body Writer is
       use Ada.Text_IO;
-      use GNAT.Regexp;
 
-      Current    : Work_Unit;
-      Expression : Regexp;
+      Current : Work_Unit;
+
+      type File_Access_Array is array (Positive range <>) of File_Access;
+      Outputs_Array : access File_Access_Array;
+
+      Output_File : aliased File_Type;
    begin
-      accept Start (Pattern : String; Case_Sensitive : Boolean) do
-         Expression := Compile (Pattern, False, Case_Sensitive);
+      accept Start (File_Name : String := "") do
+         if File_Name = "" then
+            Outputs_Array         := new File_Access_Array (1 .. 1);
+            Outputs_Array.all (1) := Standard_Output;
+         else
+            Create (Output_File, Append_File, File_Name);
 
+            Outputs_Array         := new File_Access_Array (1 .. 2);
+            Outputs_Array.all (1) := Standard_Output;
+            Outputs_Array.all (2) := Output_File'Unchecked_Access;
+         end if;
       end Start;
 
       while (not Control.Stop) or else (Work_Queue.Current_Use /= 0) loop
          Work_Queue.Dequeue (Current);
 
-         if Match (Current.Address, Expression) then
-            Put_Line (Current.Address & "|" & To_String (Current.Phrase));
-         end if;
+         for File of Outputs_Array.all loop
+            Put_Line
+              (File.all, Current.Address & "|" & To_String (Current.Phrase));
+         end loop;
       end loop;
-   end Matcher;
+   end Writer;
 
 end Workers;

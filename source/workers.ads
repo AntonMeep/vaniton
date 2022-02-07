@@ -30,10 +30,12 @@ package Workers is
    end Control;
 
    task type Worker is
-      entry Start (Wallet_Kind : Wallets.Wallet_Kind);
+      entry Start
+        (Wallet_Kind    : Wallets.Wallet_Kind; Pattern : String;
+         Case_Sensitive : Boolean);
    end Worker;
 
-   task type Matcher is
-      entry Start (Pattern : String; Case_Sensitive : Boolean);
-   end Matcher;
+   task type Writer is
+      entry Start (File_Name : String := "");
+   end Writer;
 end Workers;
