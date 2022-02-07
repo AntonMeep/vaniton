@@ -1,0 +1,27 @@
+name: CI linux
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: CI on Linux
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install toolchain
+      uses: ada-actions/toolchain@ce2021
+      with:
+        distrib: community
+    
+    - name: Build vaniton
+      run: >
+        gprbuild -P vaniton.gpr -XBUILD=DEBUG -j0
