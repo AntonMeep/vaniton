@@ -6,10 +6,8 @@ with Types;     use Types;
 
 package Contracts is
    type Wallet_Contract is
-     (Wallet_Contract_Simple_R1, Wallet_Contract_Simple_R2,
-      Wallet_Contract_Simple_R3, Wallet_Contract_V2_R1, Wallet_Contract_V2_R2,
-      Wallet_Contract_V3_R1, Wallet_Contract_V3_R2, Wallet_Contract_V4_R1,
-      Wallet_Contract_V4_R2);
+     (Simple_R1, Simple_R2, Simple_R3, V2_R1, V2_R2, V3_R1, V3_R2, V4_R1,
+      V4_R2);
 
    type Contract is record
       Kind      : Wallet_Contract;
@@ -20,6 +18,6 @@ package Contracts is
 
    function Create
      (Public_Key : Byte_Array; Workchain : Integer_8 := 0;
-      Kind       : Wallet_Contract := Wallet_Contract_V3_R2) return Contract;
+      Kind       : Wallet_Contract := V3_R2) return Contract;
    function Get_Address (This_Original : in Contract) return Address;
 end Contracts;

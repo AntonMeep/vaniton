@@ -37,7 +37,7 @@ package body Contracts is
 
    function Create
      (Public_Key : Byte_Array; Workchain : Integer_8 := 0;
-      Kind       : Wallet_Contract := Wallet_Contract_V3_R2) return Contract
+      Kind       : Wallet_Contract := V3_R2) return Contract
    is
       Result : Contract;
    begin
@@ -45,41 +45,39 @@ package body Contracts is
       Result.Workchain := Workchain;
 
       case Result.Kind is
-         when Wallet_Contract_Simple_R1 =>
+         when Simple_R1 =>
             Result.Code := Wallet_Code_Simple_R1;
-         when Wallet_Contract_Simple_R2 =>
+         when Simple_R2 =>
             Result.Code := Wallet_Code_Simple_R2;
-         when Wallet_Contract_Simple_R3 =>
+         when Simple_R3 =>
             Result.Code := Wallet_Code_Simple_R3;
-         when Wallet_Contract_V2_R1 =>
+         when V2_R1 =>
             Result.Code := Wallet_Code_V2_R1;
-         when Wallet_Contract_V2_R2 =>
+         when V2_R2 =>
             Result.Code := Wallet_Code_V2_R2;
-         when Wallet_Contract_V3_R1 =>
+         when V3_R1 =>
             Result.Code := Wallet_Code_V3_R1;
-         when Wallet_Contract_V3_R2 =>
+         when V3_R2 =>
             Result.Code := Wallet_Code_V3_R2;
-         when Wallet_Contract_V4_R1 =>
+         when V4_R1 =>
             Result.Code := Wallet_Code_V4_R1;
-         when Wallet_Contract_V4_R2 =>
+         when V4_R2 =>
             Result.Code := Wallet_Code_V4_R2;
       end case;
 
       case Result.Kind is
-         when Wallet_Contract_Simple_R1 | Wallet_Contract_Simple_R2 |
-           Wallet_Contract_Simple_R3 | Wallet_Contract_V2_R1 |
-           Wallet_Contract_V2_R2 =>
+         when Simple_R1 | Simple_R2 | Simple_R3 | V2_R1 | V2_R2 =>
             Result.Data := Empty_Cell;
             Write (Result.Data, Unsigned_32 (0));
             Write (Result.Data, Public_Key);
-         when Wallet_Contract_V3_R1 | Wallet_Contract_V3_R2 =>
+         when V3_R1 | V3_R2 =>
             Result.Data := Empty_Cell;
             Write (Result.Data, Unsigned_32 (0));
             Write
               (Result.Data,
                Unsigned_32 (698_983_191 + Integer (Result.Workchain)));
             Write (Result.Data, Public_Key);
-         when Wallet_Contract_V4_R1 | Wallet_Contract_V4_R2 =>
+         when V4_R1 | V4_R2 =>
             Write (Result.Data, Unsigned_32 (0));
             Write
               (Result.Data,
