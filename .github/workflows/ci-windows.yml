@@ -30,6 +30,7 @@ jobs:
         Copy-Item "C:\msys64\mingw64\lib\libcrypto.*" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\lib"
         mkdir bin
         Copy-Item "C:\msys64\mingw64\bin\libcrypto-1_1-x64.dll" -Destination "bin"
+        Copy-Item "C:\msys64\mingw64\share\licenses\openssl\LICENSE" -Destination ".\LICENSE.OpenSSL"
 
     - name: Build release
       run: >
@@ -44,3 +45,4 @@ jobs:
           bin/libcrypto-1_1-x64.dll
           README.md
           LICENSE.txt
+          LICENSE.OpenSSL
