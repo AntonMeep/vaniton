@@ -1,8 +1,0 @@
-[submodule ".\\third-party\\sparknacl\\"]
-	path = .\\third-party\\sparknacl\\
-	url = https://github.com/rod-chapman/SPARKNaCl.git
-	branch = alire3.0.0
-[submodule ".\\third-party\\fastpbkdf2\\"]
-	path = .\\third-party\\fastpbkdf2\\
-	url = https://github.com/ctz/fastpbkdf2.git
-	branch = 0b3e0347f30a2d4620c673e170b44294202d0afa
