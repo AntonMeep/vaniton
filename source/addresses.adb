@@ -7,14 +7,16 @@ with Base64; use Base64;
 package body Addresses is
    function Convert is new Ada.Unchecked_Conversion (Integer_8, Unsigned_8);
 
-   function Get_Tag (This : Address) return Unsigned_8 is
+   function Get_Tag
+     (Test_Only : Boolean; Bounceable : Boolean) return Unsigned_8
+   is
       Tag : Unsigned_8 := 0;
    begin
-      if This.Test_Only then
+      if Test_Only then
          Tag := Unsigned_8 (16#80#);
       end if;
 
-      if This.Bounceable then
+      if Bounceable then
          Tag := Tag or Unsigned_8 (16#11#);
       else
          Tag := Tag or Unsigned_8 (16#51#);
@@ -40,7 +42,7 @@ package body Addresses is
       Binary_Data : Byte_Array (1 .. 34);
    begin
 
-      Binary_Data (1)       := Get_Tag (Data);
+      Binary_Data (1)       := Get_Tag (Data.Test_Only, Data.Bounceable);
       Binary_Data (2)       := Convert (Data.Workchain);
       Binary_Data (3 .. 34) := Data.Hash_Part;
       return CRC16 (Binary_Data);
@@ -137,14 +139,32 @@ package body Addresses is
    function Is_Test_Only (This : in Address) return Boolean is
      (This.Test_Only);
 
-   function To_String (This : Address) return String is
+   function To_String
+     (This      : Address; User_Friendly : Boolean := True;
+      Url_Safe  : Boolean    := True; Bounceable : Triboolean := Indeterminate;
+      Test_Only : Triboolean := Indeterminate) return String
+   is
       Data : Byte_Array (1 .. 36);
    begin
-      Data (1)        := Get_Tag (This);
-      Data (2)        := Convert (This.Workchain);
-      Data (3 .. 34)  := This.Hash_Part;
-      Data (35 .. 36) := This.CRC;
+      if User_Friendly then
+         Data (1) :=
+           Get_Tag
+             ((if Test_Only = Indeterminate then This.Test_Only
+               else To_Boolean (Test_Only)),
+              (if Bounceable = Indeterminate then This.Bounceable
+               else To_Boolean (Bounceable)));
+         Data (2)        := Convert (This.Workchain);
+         Data (3 .. 34)  := This.Hash_Part;
+         Data (35 .. 36) := This.CRC;
 
-      return To_Base64 (Data);
+         if Url_Safe then
+            return To_Base64Url (Data);
+         else
+            return To_Base64 (Data);
+         end if;
+      else
+         return This.Workchain'Image & ":" & To_Hex_String (This.Hash_Part);
+      end if;
+
    end To_String;
 end Addresses;

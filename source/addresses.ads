@@ -18,7 +18,10 @@ package Addresses is
    function Is_Bounceable (This : in Address) return Boolean;
    function Is_Test_Only (This : in Address) return Boolean;
 
-   function To_String (This : Address) return String;
+   function To_String
+     (This      : Address; User_Friendly : Boolean := True;
+      Url_Safe  : Boolean    := True; Bounceable : Triboolean := Indeterminate;
+      Test_Only : Triboolean := Indeterminate) return String;
 private
    type Address is record
       Test_Only  : Boolean := False;

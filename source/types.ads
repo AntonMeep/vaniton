@@ -1,6 +1,10 @@
 with Interfaces; use Interfaces;
 
 package Types is
+   type Triboolean is (True, False, Indeterminate);
+   function To_Triboolean (Value : Boolean) return Triboolean;
+   function To_Boolean (Value : Triboolean) return Boolean;
+
    type Bit_Array is array (Natural range <>) of Boolean;
    pragma Pack (Bit_Array);
    type Byte_Array is array (Natural range <>) of aliased Unsigned_8;

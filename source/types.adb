@@ -3,6 +3,11 @@ pragma Ada_2012;
 with Ada.Unchecked_Conversion;
 
 package body Types is
+   function To_Triboolean (Value : Boolean) return Triboolean is
+     (if Value then Triboolean'(True) else Triboolean'(False));
+   function To_Boolean (Value : Triboolean) return Boolean is
+     (Value = Triboolean'(True));
+
    function To_Byte_Array (Item : in String) return Byte_Array is
       Result : Byte_Array (Item'First .. Item'Last);
    begin

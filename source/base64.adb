@@ -1,5 +1,7 @@
 pragma Ada_2012;
 
+with Ada.Strings.Fixed;
+
 with Interfaces; use Interfaces;
 
 package body Base64 is
@@ -165,4 +167,19 @@ package body Base64 is
 
       return Result (1 .. Index);
    end To_Base64;
+
+   function Mapping (From : in Character) return Character is
+   begin
+      case From is
+         when '+' =>
+            return '-';
+         when '/' =>
+            return '_';
+         when others =>
+            return From;
+      end case;
+   end Mapping;
+
+   function To_Base64Url (Input : Byte_Array) return String is
+     (Ada.Strings.Fixed.Translate (To_Base64 (Input), Mapping'Access));
 end Base64;
