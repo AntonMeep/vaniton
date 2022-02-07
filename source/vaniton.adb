@@ -1,8 +1,9 @@
-with Ada.Characters.Handling; use Ada.Characters.Handling;
-with Ada.Text_IO;             use Ada.Text_IO;
+with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Text_IO;    use Ada.Text_IO;
 
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;      use GNAT.Strings;
+with GNAT.OS_Lib;
 
 with Wallets;
 with Workers; use Workers;
@@ -17,7 +18,7 @@ procedure Vaniton is
    Log_File           : aliased String_Access := new String'("");
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
-   Worker_Array : access Worker_Array_Type;
+   Worker_Array : access Worker_Array_Type := null;
    The_Writer   : Writer;
 begin
    Define_Switch
@@ -58,4 +59,10 @@ begin
    end;
 
    Control.Signal_Stop;
+exception
+   when Exit_From_Command_Line =>
+      GNAT.OS_Lib.OS_Exit (0); -- All chill
+   when Error : others =>
+      Put (Exception_Information (Error));
+      GNAT.OS_Lib.OS_Exit (-1);
 end Vaniton;
