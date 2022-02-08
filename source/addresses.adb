@@ -42,7 +42,7 @@ package body Addresses is
    end Create;
 
    procedure Create (This : in out Address; Addr : String) is
-      Data : Byte_Array := From_Base64 (Addr);
+      Data : constant Byte_Array := From_Base64 (Addr);
 
       function Convert is new Ada.Unchecked_Conversion (Unsigned_8, Integer_8);
    begin
@@ -52,11 +52,11 @@ package body Addresses is
       end if;
 
       declare
-         Address_Part   : Byte_Array := Data (1 .. 34);
-         CRC            : Byte_Array := Data (35 .. 36);
-         Calculated_CRC : Byte_Array := CRC16 (Address_Part);
-         Tag            : Unsigned_8 := Address_Part (1);
-         Workchain      : Integer_8  := Convert (Address_Part (2));
+         Address_Part   : constant Byte_Array := Data (1 .. 34);
+         CRC            : constant Byte_Array := Data (35 .. 36);
+         Calculated_CRC : constant Byte_Array := CRC16 (Address_Part);
+         Tag            : Unsigned_8          := Address_Part (1);
+         Workchain      : constant Integer_8  := Convert (Address_Part (2));
 
          Test_Only  : Boolean := False;
          Bounceable : Boolean := False;

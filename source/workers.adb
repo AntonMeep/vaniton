@@ -1,11 +1,10 @@
 pragma Ada_2012;
 
-with Ada.Containers;           use Ada.Containers;
-with Ada.Calendar;             use Ada.Calendar;
-with Ada.Calendar.Conversions; use Ada.Calendar.Conversions;
+with Ada.Containers;        use Ada.Containers;
+with Ada.Calendar;          use Ada.Calendar;
 with Ada.Text_IO;
 with GNAT.Regexp;
-with GNAT.Formatted_String;    use GNAT.Formatted_String;
+with GNAT.Formatted_String; use GNAT.Formatted_String;
 
 with Addresses;
 with Cryptography;
@@ -92,7 +91,6 @@ package body Workers is
    end Writer;
 
    task body Benchmarker is
-      use Ada.Calendar;
       use Ada.Text_IO;
       use GNAT.Regexp;
 

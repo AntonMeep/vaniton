@@ -5,7 +5,7 @@ with Ada.Strings.Fixed;
 with Interfaces; use Interfaces;
 
 package body Base64 is
-   PAD      : constant Character := '=';
+   PAD_CHAR : constant Character := '=';
    DE_FIRST : constant Character := '+';
    DE_LAST  : constant Character := 'z';
 
@@ -67,7 +67,7 @@ package body Base64 is
       end if;
 
       for I in Input'Range loop
-         exit when Input (I) = PAD;
+         exit when Input (I) = PAD_CHAR;
 
          if Input (I) < DE_FIRST or else Input (I) > DE_LAST then
             raise Base64_Error with "Invalid base64 character";
@@ -152,14 +152,14 @@ package body Base64 is
             Result (Index + 1) :=
               Encoding_Table
                 (Integer (Shift_Left (Last and Unsigned_8 (16#3#), 4)));
-            Result (Index + 2) := PAD;
-            Result (Index + 3) := PAD;
+            Result (Index + 2) := PAD_CHAR;
+            Result (Index + 3) := PAD_CHAR;
             Index              := Index + 3;
          when 2 =>
             Result (Index + 1) :=
               Encoding_Table
                 (Integer (Shift_Left (Last and Unsigned_8 (16#F#), 2)));
-            Result (Index + 2) := PAD;
+            Result (Index + 2) := PAD_CHAR;
             Index              := Index + 2;
          when others =>
             null;
