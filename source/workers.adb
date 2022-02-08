@@ -64,18 +64,22 @@ package body Workers is
 
       Output_File : aliased File_Type;
    begin
-      accept Start (File_Name : String := "") do
-         if File_Name = "" then
-            Outputs_Array         := new File_Access_Array (1 .. 1);
-            Outputs_Array.all (1) := Standard_Output;
-         else
-            Create (Output_File, Append_File, File_Name);
+      select
+         accept Start (File_Name : String := "") do
+            if File_Name = "" then
+               Outputs_Array         := new File_Access_Array (1 .. 1);
+               Outputs_Array.all (1) := Standard_Output;
+            else
+               Create (Output_File, Append_File, File_Name);
 
-            Outputs_Array         := new File_Access_Array (1 .. 2);
-            Outputs_Array.all (1) := Standard_Output;
-            Outputs_Array.all (2) := Output_File'Unchecked_Access;
-         end if;
-      end Start;
+               Outputs_Array         := new File_Access_Array (1 .. 2);
+               Outputs_Array.all (1) := Standard_Output;
+               Outputs_Array.all (2) := Output_File'Unchecked_Access;
+            end if;
+         end Start;
+      or
+         terminate;
+      end select;
 
       while (not Control.Stop) or else (Work_Queue.Current_Use /= 0) loop
          Work_Queue.Dequeue (Current);
@@ -104,7 +108,12 @@ package body Workers is
 
       Current : Work_Unit;
    begin
-      accept Start;
+      select
+         accept Start;
+      or
+         terminate;
+      end select;
+
       Start_Time := Clock;
 
       while (not Control.Stop) or else (Work_Queue.Current_Use /= 0) loop
