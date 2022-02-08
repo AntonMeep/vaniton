@@ -6,6 +6,9 @@ with Base64; use Base64;
 
 package body Addresses is
    function Convert is new Ada.Unchecked_Conversion (Integer_8, Unsigned_8);
+   function Get_Tag
+     (Test_Only : Boolean; Bounceable : Boolean) return Unsigned_8;
+   function CRC16 (Data : Address) return Byte_Array;
 
    function Get_Tag
      (Test_Only : Boolean; Bounceable : Boolean) return Unsigned_8

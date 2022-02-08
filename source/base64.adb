@@ -14,47 +14,46 @@ package body Base64 is
 
    Encoding_Table : constant Character_Array (0 .. 63) :=
      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+   pragma Style_Checks (Off);
+   --!pp off
    Decoding_Table : constant Unsigned_8_Array (0 .. 127) :=
-     (
-   -- nul, soh, stx, etx, eot, enq, ack, bel,
-   255, 255, 255, 255, 255, 255, 255, 255,
-   -- bs,  ht,  nl,  vt,  np,  cr,  so,  si,
-   255, 255, 255, 255, 255, 255,
-      255, 255,
-   -- dle, dc1, dc2, dc3, dc4, nak, syn, etb,
-   255, 255, 255, 255, 255, 255, 255, 255,
-   -- can,  em, sub, esc,  fs,  gs,  rs,  us,
-   255, 255, 255, 255,
-      255, 255, 255, 255,
-   -- sp, '!', '"', '#', '$', '%', '&', ''',
-   255, 255, 255, 255, 255, 255, 255, 255,
-   -- '(', ')', '*', '+', ',', '-', '.', '/',
-   255, 255,
-      255, 62, 255, 255, 255, 63,
-   -- '0', '1', '2', '3', '4', '5', '6', '7',
-   52, 53, 54, 55, 56, 57, 58, 59,
-   -- '8', '9', ':', ';', '<', '=', '>', '?',
-   60, 61, 255,
-      255, 255, 255, 255, 255,
-   -- '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-   255, 0, 1, 2, 3, 4, 5, 6,
-   -- 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-   7, 8, 9, 10, 11, 12,
-      13, 14,
-   -- 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-   15, 16, 17, 18, 19, 20, 21, 22,
-   -- 'X', 'Y', 'Z', '[', '\', ']', '^', '_',
-   23, 24, 25, 255, 255, 255, 255,
-      255,
-   -- '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-   255, 26, 27, 28, 29, 30, 31, 32,
-   -- 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
-   33, 34, 35, 36, 37, 38, 39, 40,
-   -- 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
-   41,
-      42, 43, 44, 45, 46, 47, 48,
-   -- 'x', 'y', 'z', '{', '|', '}', '~', del,
-   49, 50, 51, 255, 255, 255, 255, 255);
+   (
+      -- nul, soh, stx, etx, eot, enq, ack, bel,
+      255, 255, 255, 255, 255, 255, 255, 255,
+      -- bs,  ht,  nl,  vt,  np,  cr,  so,  si,
+      255, 255, 255, 255, 255, 255, 255, 255,
+      -- dle, dc1, dc2, dc3, dc4, nak, syn, etb,
+      255, 255, 255, 255, 255, 255, 255, 255,
+      -- can,  em, sub, esc,  fs,  gs,  rs,  us,
+      255, 255, 255, 255, 255, 255, 255, 255,
+      -- sp, '!', '"', '#', '$', '%', '&', ''',
+      255, 255, 255, 255, 255, 255, 255, 255,
+      -- '(', ')', '*', '+', ',', '-', '.', '/',
+      255, 255, 255, 62, 255, 255, 255, 63,
+      -- '0', '1', '2', '3', '4', '5', '6', '7',
+      52, 53, 54, 55, 56, 57, 58, 59,
+      -- '8', '9', ':', ';', '<', '=', '>', '?',
+      60, 61, 255, 255, 255, 255, 255, 255,
+      -- '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+      255, 0, 1, 2, 3, 4, 5, 6,
+      -- 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+      7, 8, 9, 10, 11, 12, 13, 14,
+      -- 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+      15, 16, 17, 18, 19, 20, 21, 22,
+      -- 'X', 'Y', 'Z', '[', '\', ']', '^', '_',
+      23, 24, 25, 255, 255, 255, 255, 255,
+      -- '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+      255, 26, 27, 28, 29, 30, 31, 32,
+      -- 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+      33, 34, 35, 36, 37, 38, 39, 40,
+      -- 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+      41, 42, 43, 44, 45, 46, 47, 48,
+      -- 'x', 'y', 'z', '{', '|', '}', '~', del,
+      49, 50, 51, 255, 255, 255, 255, 255
+   );
+   --!pp on
+   pragma Style_Checks (On);
 
    function From_Base64 (Input : String) return Byte_Array is
       Result : Byte_Array
@@ -168,6 +167,11 @@ package body Base64 is
       return Result (1 .. Index);
    end To_Base64;
 
+   function Mapping (From : in Character) return Character;
+
+   function To_Base64Url (Input : Byte_Array) return String is
+     (Ada.Strings.Fixed.Translate (To_Base64 (Input), Mapping'Access));
+
    function Mapping (From : in Character) return Character is
    begin
       case From is
@@ -179,7 +183,4 @@ package body Base64 is
             return From;
       end case;
    end Mapping;
-
-   function To_Base64Url (Input : Byte_Array) return String is
-     (Ada.Strings.Fixed.Translate (To_Base64 (Input), Mapping'Access));
 end Base64;

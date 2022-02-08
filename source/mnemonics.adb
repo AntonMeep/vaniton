@@ -8,6 +8,7 @@ package body Mnemonics is
       List        : Wordlist := English_Words) return Mnemonic
    is
       Result : Mnemonic (1 .. Words_Count);
+      function Check_Validity return Boolean;
 
       function Check_Validity return Boolean is
          Entropy : constant Byte_Array := To_Entropy (Result);
