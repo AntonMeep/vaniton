@@ -1,22 +1,16 @@
 pragma Ada_2012;
 
-with Ada.Containers;
-with Ada.Containers.Bounded_Vectors;
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
 
 with Cryptography;
 
 package body Cells is
-   function From_Bits (Data : String) return Cell is
-     (From_Bits (From_Hex_String (Data)));
-
-   function From_Bits (Data : Bit_Array) return Cell is
+   function Empty_Cell return Cell is
       Result : Cell;
    begin
-      Result.Bits (1 .. Data'Length) := Data;
-      Result.Length                  := Data'Length;
       return Result;
-   end From_Bits;
+   end Empty_Cell;
 
    function From_BoC (Data : String) return Cell is
      (From_BoC (From_Hex_String (Data)));
@@ -75,19 +69,14 @@ package body Cells is
 
          cells_data : Byte_Array (1 .. Positive (tot_cells_size));
 
-         package Reference_Vectors is new Ada.Containers.Bounded_Vectors
-           (Positive, Unsigned_32);
-         use Reference_Vectors;
+         type Cell_Array_Type is array (Positive range <>) of Cell;
+         cells_array : Cell_Array_Type (1 .. Positive (cells_num));
 
-         type Cell_Definition is record
-            C : Cell_Access :=
-              new Cell'(Empty_Cell); -- TODO: Memory leaks everywhere
-            -- Gotta find a way to destroy unreferenced and unused cells
-            R : Reference_Vectors.Vector (4);
-         end record;
-
-         type Cells_Array_Type is array (Positive range <>) of Cell_Definition;
-         cells_array : Cells_Array_Type (1 .. Positive (cells_num));
+         type Cell_Reference_Array is array (Positive range <>) of Unsigned_32;
+         type Cell_Reference_Map is
+           array (Positive range <>) of Cell_Reference_Array (1 .. 4);
+         cells_reference : Cell_Reference_Map (1 .. Positive (cells_num)) :=
+           (others => (others => Unsigned_32'Last));
 
          Cells_Data_Index : Positive := 1;
       begin
@@ -118,20 +107,20 @@ package body Cells is
             begin
                Cells_Data_Index := Cells_Data_Index + 2;
 
-               cells_array (I).C.all.Bits
+               cells_array (I).Data.all.Bits
                  (1 .. Positive (Data_Bytes_Size) * 8) :=
                  To_Bit_Array
                    (cells_data
                       (Cells_Data_Index ..
                            Cells_Data_Index + Positive (Data_Bytes_Size) - 1));
                if Fullfilled_Bytes then
-                  cells_array (I).C.all.Length :=
+                  cells_array (I).Data.all.Length :=
                     Natural (Data_Bytes_Size) * 8;
                else
                   for L in reverse 1 .. Positive (Data_Bytes_Size) * 8 loop
-                     if cells_array (I).C.all.Bits (L) then
-                        cells_array (I).C.all.Bits (L) := False;
-                        cells_array (I).C.all.Length   := L - 1;
+                     if cells_array (I).Data.all.Bits (L) then
+                        cells_array (I).Data.all.Bits (L) := False;
+                        cells_array (I).Data.all.Length   := L - 1;
                         exit;
                      end if;
                   end loop;
@@ -140,7 +129,7 @@ package body Cells is
                  Cells_Data_Index + Positive (Data_Bytes_Size);
 
                for L in 1 .. Reference_Number loop
-                  cells_array (I).R.Append
+                  cells_reference (I) (Integer (L)) :=
                     (Read_NBytes (cells_data, Cells_Data_Index, size_bytes));
                   Cells_Data_Index := Cells_Data_Index + Positive (size_bytes);
                end loop;
@@ -148,9 +137,10 @@ package body Cells is
          end loop;
 
          for I in reverse 1 .. Positive (cells_num) loop
-            for R of cells_array (I).R loop
+            for R of cells_reference (I) loop
+               exit when R = Unsigned_32'Last;
                Append_Reference
-                 (cells_array (I).C.all, cells_array (Integer (R) + 1).C);
+                 (cells_array (I), cells_array (Integer (R) + 1));
             end loop;
          end loop;
 
@@ -163,17 +153,19 @@ package body Cells is
             raise Cell_Error with "Too much data for BoC deserialization";
          end if;
 
-         return cells_array (1).C.all;
+         return cells_array (1);
       end;
    end From_BoC;
 
-   function Get_Max_Level (This : Cell) return Unsigned_8 is
+   function Get_Max_Level (This : in out Cell_Data) return Unsigned_8 is
+      -- Idk why this exists, it always just returns zero duh
       Max_Level : Unsigned_8 := 0;
    begin
-      for I in 1 .. This.Number_Of_References loop
+      for I in This.Cell_References'Range loop
+         exit when This.Cell_References (I) = null;
          declare
             Inner_Level : Unsigned_8 :=
-              Get_Max_Level (This.References (I).all);
+              Get_Max_Level (This.Cell_References (I).all);
          begin
             if Inner_Level > Max_Level then
                Max_Level := Inner_Level;
@@ -183,102 +175,123 @@ package body Cells is
       return Max_Level;
    end Get_Max_Level;
 
-   function Get_Max_Depth (This : Cell) return Unsigned_16 is
+   function Get_Max_Depth (This : in out Cell_Data) return Unsigned_16 is
       Max_Depth : Unsigned_16 := 0;
    begin
-      if This.Number_Of_References /= 0 then
-         for I in 1 .. This.Number_Of_References loop
-            declare
-               Inner_Depth : Unsigned_16 :=
-                 Get_Max_Depth (This.References (I).all);
-            begin
-               if Inner_Depth > Max_Depth then
-                  Max_Depth := Inner_Depth;
-               end if;
-            end;
-         end loop;
+      for I in This.Cell_References'Range loop
+         exit when This.Cell_References (I) = null;
+         declare
+            Inner_Depth : Unsigned_16 :=
+              Get_Max_Depth (This.Cell_References (I).all);
+         begin
+            if Inner_Depth > Max_Depth then
+               Max_Depth := Inner_Depth;
+            end if;
+         end;
+      end loop;
+
+      if This.Cell_References (1) /= null then
          Max_Depth := Max_Depth + 1;
       end if;
+
       return Max_Depth;
    end Get_Max_Depth;
 
-   function Representation (This : Cell) return Byte_Array is
-      Index : Natural := 1;
+   function Hash (This : in out Cell_Data) return Byte_Array;
 
-      Refs_Descriptor : Unsigned_8 :=
-        Unsigned_8 (This.Number_Of_References) +
-      -- This.Is_Exotic * 8 + -- Completely useless for our purposes
-      Get_Max_Level (This) * 32; -- Also does nothing, always 0
+   function Representation (This : in out Cell_Data) return Byte_Array is
+      Number_Of_References : Natural := 0;
+      Index                : Natural := 1;
 
-      Bits_Descriptor : Unsigned_8 :=
-        Unsigned_8 (Float'Ceiling (Float (This.Length) / Float (8))) +
-        Unsigned_8 (Float'Floor (Float (This.Length) / Float (8)));
-
-      Data_Length : Natural := Padded_Length (This.Length) / 8;
-
-      Result : Byte_Array
-        (1 ..
-             2 + Data_Length + 2 * This.Number_Of_References +
-             32 * This.Number_Of_References) :=
-        (others => 0);
+      Data_Length : constant Natural := Padded_Length (This.Length) / 8;
    begin
-      Result (Index) := Refs_Descriptor;
-      Index          := Index + 1;
-      Result (Index) := Bits_Descriptor;
-      Index          := Index + 1;
+      for I in This.Cell_References'Range loop
+         exit when This.Cell_References (I) = null;
+         Number_Of_References := Number_Of_References + 1;
+      end loop;
 
       declare
+         Result : Byte_Array
+           (1 ..
+                2 + Data_Length + 2 * Number_Of_References +
+                32 * Number_Of_References) :=
+           (others => 0);
+
          Padded : Bit_Array (1 .. Padded_Length (This.Length)) :=
            Pad (This.Bits (1 .. This.Length));
       begin
+         -- First byte - reference descriptor
+         Result (Index) :=
+           Unsigned_8 (Number_Of_References) +
+         -- This.Is_Exotic * 8 + -- Completely useless for our purposes
+         Get_Max_Level (This) * 32; -- Also does nothing, always 0
+         Index := Index + 1;
+         -- Second byte - bits descriptor
+         Result (Index) :=
+           Unsigned_8 (Float'Ceiling (Float (This.Length) / Float (8))) +
+           Unsigned_8 (Float'Floor (Float (This.Length) / Float (8)));
+         Index := Index + 1;
+
+         -- Padded data
          if Padded'Length /= This.Length then
             Padded (This.Length + 1) := True;
          end if;
          Result (Index .. Index + Data_Length - 1) := To_Byte_Array (Padded);
          Index                                     := Index + Data_Length;
+
+         for I in 1 .. Number_Of_References loop
+            declare
+               Max_Depth : Unsigned_16 :=
+                 Get_Max_Depth (This.Cell_References (I).all);
+            begin
+               Result (Index) :=
+                 Unsigned_8 (Float'Floor (Float (Max_Depth) / Float (256)));
+               Result (Index + 1) := Unsigned_8 (Max_Depth rem 256);
+               Index              := Index + 2;
+            end;
+         end loop;
+
+         for I in 1 .. Number_Of_References loop
+            Result (Index .. Index + 31) :=
+              Hash (This.Cell_References (I).all);
+            Index := Index + 32;
+         end loop;
+         return Result;
       end;
-
-      for I in 1 .. This.Number_Of_References loop
-         declare
-            Max_Depth : Unsigned_16 := Get_Max_Depth (This.References (I).all);
-         begin
-            Result (Index) :=
-              Unsigned_8 (Float'Floor (Float (Max_Depth) / Float (256)));
-            Result (Index + 1) := Unsigned_8 (Max_Depth rem 256);
-            Index              := Index + 2;
-         end;
-      end loop;
-
-      for I in 1 .. This.Number_Of_References loop
-         Result (Index .. Index + 31) := Hash (This.References (I).all);
-         Index                        := Index + 32;
-      end loop;
-      return Result;
    end Representation;
 
-   function Hash (This : Cell) return Byte_Array is
+   function Representation (This : in out Cell) return Byte_Array is
+     (Representation (This.Data.all));
+
+   function Hash (This : in out Cell_Data) return Byte_Array is
      (Cryptography.SHA256 (Representation (This)));
 
-   procedure Append_Reference
-     (This : in out Cell; Other : not null Cell_Access)
-   is
+   function Hash (This : in out Cell) return Byte_Array is
+     (Hash (This.Data.all));
+
+   procedure Append_Reference (This : in out Cell; Other : in Cell) is
    begin
-      if This.Number_Of_References = 4 then
-         raise Program_Error with "Maximum number of references reached";
-      end if;
-      This.Number_Of_References := This.Number_Of_References + 1;
-      This.References (This.Number_Of_References) := Other;
+      for I in This.Data.all.Cell_References'Range loop
+         if This.Data.all.Cell_References (I) = null then
+            This.Data.all.Cell_References (I) := Other.Data;
+            Increment (Other.Data.all.Reference_Count);
+            return;
+         end if;
+      end loop;
+      raise Cell_Error with "Cannot append any more elements to the cell";
    end Append_Reference;
 
    procedure Write (This : in out Cell; Data : Cell) is
    begin
-      Write (This, Data.Bits (1 .. Data.Length));
+      Write (This, Data.Data.all.Bits (1 .. Data.Data.all.Length));
    end Write;
 
    procedure Write (This : in out Cell; Data : Bit_Array) is
    begin
-      This.Bits (This.Length + 1 .. This.Length + Data'Length) := Data;
-      This.Length := This.Length + Data'Length;
+      This.Data.all.Bits
+        (This.Data.all.Length + 1 .. This.Data.all.Length + Data'Length) :=
+        Data;
+      This.Data.all.Length := This.Data.all.Length + Data'Length;
    end Write;
 
    procedure Write (This : in out Cell; Data : Byte_Array) is
@@ -296,10 +309,39 @@ package body Cells is
 
    procedure Write (This : in out Cell; Data : Boolean) is
    begin
-      This.Bits (This.Length + 1) := Data;
-      This.Length                 := This.Length + 1;
+      This.Data.all.Bits (This.Data.all.Length + 1) := Data;
+      This.Data.all.Length := This.Data.all.Length + 1;
    end Write;
 
-   function Bits (This : in Cell) return Bit_Array is
-     (This.Bits (1 .. This.Length));
+   procedure Initialize (This : in out Cell) is
+   begin
+      This.Data := new Cell_Data;
+   end Initialize;
+
+   procedure Adjust (This : in out Cell) is
+   begin
+      Increment (This.Data.all.Reference_Count);
+   end Adjust;
+
+   procedure Decrement (This : in out Cell_Data_Access) is
+      procedure Deallocate is new Ada.Unchecked_Deallocation
+        (Cell_Data, Cell_Data_Access);
+   begin
+      for I in This.all.Cell_References'Range loop
+         if This.all.Cell_References (I) /= null then
+            Decrement (This.all.Cell_References (I));
+            This.all.Cell_References (I) := null;
+         end if;
+      end loop;
+
+      if Decrement (This.all.Reference_Count) then
+         Deallocate (This);
+         This := null;
+      end if;
+   end Decrement;
+
+   procedure Finalize (This : in out Cell) is
+   begin
+      Decrement (This.Data);
+   end Finalize;
 end Cells;

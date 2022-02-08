@@ -158,9 +158,8 @@ package body Wallets is
       end case;
 
       Write (State_Init, State_Init_Array);
-      Append_Reference
-        (State_Init, Code'Unchecked_Access); -- Live fast, use Unchecked_
-      Append_Reference (State_Init, Data'Unchecked_Access);
+      Append_Reference (State_Init, Code);
+      Append_Reference (State_Init, Data);
 
       Result := Create (False, True, Workchain, Hash (State_Init));
 
