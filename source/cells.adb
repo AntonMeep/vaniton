@@ -290,15 +290,8 @@ package body Cells is
       subtype Output_Type is Byte_Array (1 .. 4);
       function Convert is new Ada.Unchecked_Conversion
         (Unsigned_32, Output_Type);
-
-      Buffer : Output_Type := Convert (Data);
-      Swap   : Output_Type;
    begin
-      Swap (1) := Buffer (4);
-      Swap (2) := Buffer (3);
-      Swap (3) := Buffer (2);
-      Swap (4) := Buffer (1);
-      Write (This, Swap);
+      Write (This, Reverse_Bytes (Convert (Data)));
    end Write;
 
    procedure Write (This : in out Cell; Data : Boolean) is

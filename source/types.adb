@@ -159,6 +159,15 @@ package body Types is
    function From_Hex_String (Item : in String) return Bit_Array is
      (To_Bit_Array (From_Hex_String (Item)));
 
+   function Reverse_Bytes (Item : in Byte_Array) return Byte_Array is
+      Result : Byte_Array (Item'First .. Item'Last);
+   begin
+      for I in Item'Range loop
+         Result (Result'Last - I + 1) := Item (I);
+      end loop;
+      return Result;
+   end Reverse_Bytes;
+
    function CRC16 (Data : Byte_Array) return Unsigned_16 is
       Result : Unsigned_16 := 0;
    begin
@@ -175,5 +184,13 @@ package body Types is
       end loop;
 
       return Result;
+   end CRC16;
+
+   function CRC16 (Data : Byte_Array) return Byte_Array is
+      subtype Output_Type is Byte_Array (1 .. 2);
+      function Convert is new Ada.Unchecked_Conversion
+        (Unsigned_16, Output_Type);
+   begin
+      return Reverse_Bytes (Convert (CRC16 (Data)));
    end CRC16;
 end Types;

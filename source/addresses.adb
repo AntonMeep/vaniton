@@ -24,20 +24,6 @@ package body Addresses is
       return Tag;
    end Get_Tag;
 
-   function CRC16 (Data : Byte_Array) return Byte_Array is
-      subtype Output_Type is Byte_Array (1 .. 2);
-
-      function Convert is new Ada.Unchecked_Conversion
-        (Unsigned_16, Output_Type);
-
-      Buffer : Output_Type := Convert (CRC16 (Data));
-      Swap   : Output_Type;
-   begin
-      Swap (1) := Buffer (2);
-      Swap (2) := Buffer (1);
-      return Swap;
-   end CRC16;
-
    function CRC16 (Data : Address) return Byte_Array is
       Binary_Data : Byte_Array (1 .. 34);
    begin

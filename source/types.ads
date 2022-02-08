@@ -27,5 +27,8 @@ package Types is
    function To_Hex_String (Item : in Bit_Array) return String;
    function From_Hex_String (Item : in String) return Bit_Array;
 
+   function Reverse_Bytes (Item : in Byte_Array) return Byte_Array;
+
    function CRC16 (Data : Byte_Array) return Unsigned_16;
+   function CRC16 (Data : Byte_Array) return Byte_Array;
 end Types;
