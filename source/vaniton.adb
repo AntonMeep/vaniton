@@ -16,10 +16,12 @@ procedure Vaniton is
    Pattern            : aliased String_Access := new String'("");
    Case_Sensitive     : aliased Boolean       := False;
    Log_File           : aliased String_Access := new String'("");
+   Benchmark          : aliased Boolean       := False;
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
-   Worker_Array : access Worker_Array_Type := null;
-   The_Writer   : Writer;
+   Worker_Array  : access Worker_Array_Type := null;
+   The_Writer    : Writer;
+   The_Benchmark : Benchmarker;
 begin
    Define_Switch
      (Config, Number_Of_Workers'Access, "-t:", "--threads=",
@@ -36,6 +38,9 @@ begin
    Define_Switch
      (Config, Log_File'Access, "-l:", "--log=",
       "Log file to write found phrases to (default: "" = none)");
+   Define_Switch
+     (Config, Benchmark'Access, "-b", "--benchmark",
+      "Start benchmark instead");
 
    Getopt (Config);
 
@@ -46,7 +51,12 @@ begin
    for I in Worker_Array.all'Range loop
       Worker_Array.all (I).Start (Wallet_Kind, Pattern.all, Case_Sensitive);
    end loop;
-   The_Writer.Start (Log_File.all);
+
+   if Benchmark then
+      The_Benchmark.Start;
+   else
+      The_Writer.Start (Log_File.all);
+   end if;
 
    declare
       Key       : Character;

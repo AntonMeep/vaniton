@@ -1,8 +1,11 @@
 pragma Ada_2012;
 
-with Ada.Containers; use Ada.Containers;
+with Ada.Containers;           use Ada.Containers;
+with Ada.Calendar;             use Ada.Calendar;
+with Ada.Calendar.Conversions; use Ada.Calendar.Conversions;
 with Ada.Text_IO;
 with GNAT.Regexp;
+with GNAT.Formatted_String;    use GNAT.Formatted_String;
 
 with Addresses;
 with Cryptography;
@@ -84,4 +87,42 @@ package body Workers is
       end loop;
    end Writer;
 
+   task body Benchmarker is
+      use Ada.Calendar;
+      use Ada.Text_IO;
+      use GNAT.Regexp;
+
+      type Regexp_Array is array (Positive range <>) of Regexp;
+
+      Expressions : constant Regexp_Array (1 .. 10) :=
+        (Compile (".*a.*"), Compile (".*ab.*"), Compile (".*abc.*"),
+         Compile (".*abcd.*"), Compile (".*abcde.*"), Compile (".*abcdef.*"),
+         Compile (".*abcdefg.*"), Compile (".*abcdefgh.*"),
+         Compile (".*abcdefghi.*"), Compile (".*abcdefghij.*"));
+      Currently_Matching : Positive := 1;
+      Start_Time         : Time;
+
+      Current : Work_Unit;
+   begin
+      accept Start;
+      Start_Time := Clock;
+
+      while (not Control.Stop) or else (Work_Queue.Current_Use /= 0) loop
+         Work_Queue.Dequeue (Current);
+
+         if Match (Current.Address, Expressions (Currently_Matching)) then
+            declare
+               Taken : constant Duration := Clock - Start_Time;
+            begin
+               Put_Line
+                 (-
+                  (+"[benchmark] Matched %d characters in %ss." &
+                   Currently_Matching & Duration'Image (Taken)));
+
+               Start_Time         := Clock;
+               Currently_Matching := Currently_Matching + 1;
+            end;
+         end if;
+      end loop;
+   end Benchmarker;
 end Workers;
