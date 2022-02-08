@@ -327,14 +327,14 @@ package body Cells is
       procedure Deallocate is new Ada.Unchecked_Deallocation
         (Cell_Data, Cell_Data_Access);
    begin
-      for I in This.all.Cell_References'Range loop
-         if This.all.Cell_References (I) /= null then
-            Decrement (This.all.Cell_References (I));
-            This.all.Cell_References (I) := null;
-         end if;
-      end loop;
-
       if Decrement (This.all.Reference_Count) then
+         for I in This.all.Cell_References'Range loop
+            if This.all.Cell_References (I) /= null then
+               Decrement (This.all.Cell_References (I));
+               This.all.Cell_References (I) := null;
+            end if;
+         end loop;
+
          Deallocate (This);
          This := null;
       end if;
