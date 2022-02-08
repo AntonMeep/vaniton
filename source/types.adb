@@ -69,23 +69,15 @@ package body Types is
       Chunk : Positive := 1;
    begin
       for Byte of Item loop
-         Result (Chunk + 0) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#1000_0000#)) /= 0;
-         Result (Chunk + 1) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0100_0000#)) /= 0;
-         Result (Chunk + 2) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0010_0000#)) /= 0;
-         Result (Chunk + 3) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0001_0000#)) /= 0;
-         Result (Chunk + 4) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_1000#)) /= 0;
-         Result (Chunk + 5) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_0100#)) /= 0;
-         Result (Chunk + 6) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_0010#)) /= 0;
-         Result (Chunk + 7) :=
-           (Unsigned_8 (Byte) and Unsigned_8 (2#0000_0001#)) /= 0;
-         Chunk := Chunk + 8;
+         Result (Chunk + 0) := (Byte and Unsigned_8 (2#1000_0000#)) /= 0;
+         Result (Chunk + 1) := (Byte and Unsigned_8 (2#0100_0000#)) /= 0;
+         Result (Chunk + 2) := (Byte and Unsigned_8 (2#0010_0000#)) /= 0;
+         Result (Chunk + 3) := (Byte and Unsigned_8 (2#0001_0000#)) /= 0;
+         Result (Chunk + 4) := (Byte and Unsigned_8 (2#0000_1000#)) /= 0;
+         Result (Chunk + 5) := (Byte and Unsigned_8 (2#0000_0100#)) /= 0;
+         Result (Chunk + 6) := (Byte and Unsigned_8 (2#0000_0010#)) /= 0;
+         Result (Chunk + 7) := (Byte and Unsigned_8 (2#0000_0001#)) /= 0;
+         Chunk              := Chunk + 8;
       end loop;
 
       return Result;
