@@ -16,9 +16,9 @@ procedure Vaniton is
    Log_File           : aliased String_Access := new String'("");
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
-   Worker_Array  : access Worker_Array_Type := null;
-   The_Writer    : Writer;
-   The_Benchmark : Benchmarker;
+   type Worker_Array_Access is access all Worker_Array_Type;
+   Worker_Array : Worker_Array_Access := null;
+   The_Writer   : Writer;
 begin
    --!pp off
    Set_Usage
@@ -82,6 +82,7 @@ begin
       Key       : Character;
       Available : Boolean;
    begin
+      Put_Line (Standard_Error, "[main] Press any key to exit");
       while True loop
          Ada.Text_IO.Get_Immediate (Key, Available);
          exit when Available;
