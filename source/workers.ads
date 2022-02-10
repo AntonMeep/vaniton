@@ -38,8 +38,4 @@ package Workers is
    task type Writer is
       entry Start (File_Name : String := "");
    end Writer;
-
-   task type Benchmarker is
-      entry Start;
-   end Benchmarker;
 end Workers;

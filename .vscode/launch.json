@@ -18,6 +18,24 @@
                "ignoreFailures": true
             }
          ]
+      },
+      {
+         "name": "(gdb) Launch benchmark.exe",
+         "type": "cppdbg",
+         "request": "launch",
+         "program": "${workspaceFolder}/bin/benchmark.exe",
+         "args": [],
+         "stopAtEntry": false,
+         "cwd": "${workspaceFolder}",
+         "environment": [],
+         "MIMode": "gdb",
+         "setupCommands": [
+            {
+               "description": "Enable pretty-printing for gdb",
+               "text": "-enable-pretty-printing",
+               "ignoreFailures": true
+            }
+         ]
       }
     ]
  }

@@ -38,7 +38,7 @@ project Vaniton is
    for Excluded_Source_Files use Excluded_Sources;
    for Object_Dir use "build";
    for Exec_Dir use "bin";
-   for Main use ("vaniton.adb", "mnemonic2address.adb");
+   for Main use ("vaniton.adb", "mnemonic2address.adb", "benchmark.adb");
 
    package Builder is
       --
