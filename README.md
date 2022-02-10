@@ -51,7 +51,7 @@ Currently, program implements only a simple subset of regular expression pattern
 | .          | Matches anything |
 | (abc)      | Grouping |
 
-Note, that patterns in **vaniton** match entire address string, and by default are case-insensitive (can be changed with `-c` switch).
+Note, that patterns in **vaniton** match entire address string, and by default are case-insensitive (can be changed with `-c` switch). If you get stuck, it might be worth it to redirect output into *grep*, *awk*, or some other program of your liking to filter out unwanted addresses.
 
 Here are some of the examples to get you started:
 ```
