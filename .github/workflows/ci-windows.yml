@@ -26,7 +26,7 @@ jobs:
     
     - name: Install OpenSSL on MSYS2
       run: |
-        C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-openssl
+        C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-openssl zip
         Copy-Item -Path "C:\msys64\mingw64\include\openssl" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\x86_64-w64-mingw32\include" -Recurse
         Copy-Item "C:\msys64\mingw64\lib\libssl.*" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\lib"
         Copy-Item "C:\msys64\mingw64\lib\libcrypto.*" -Destination "D:\a\_temp\gnat-2021-20210519-x86_64-windows64-bin\lib"
