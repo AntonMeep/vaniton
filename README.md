@@ -1,4 +1,4 @@
-vaniton ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AntonMeep/vaniton/ci-linux) ![GitHub](https://img.shields.io/github/license/AntonMeep/vaniton) ![Donation address](https://img.shields.io/badge/donate%20TON-EQAnTon5VVNKup8v0EUT0SvCKsRmEpotr__3eSpqYJTneIVht%20-blue)
+vaniton ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AntonMeep/vaniton/CI%20linux) ![GitHub](https://img.shields.io/github/license/AntonMeep/vaniton) ![Donation address](https://img.shields.io/badge/donate%20TON-EQAnTon5VVNKup8v0EUT0SvCKsRmEpotr__3eSpqYJTneIVht%20-blue)
 =======
 
 **vaniton** is a vanity wallet address generator for [The Open Network's](https://ton.org/) blockchain. Currently it supports all major versions of wallet smart contracts you could encounter (from SimpleR1 to V4R2).
