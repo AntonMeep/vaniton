@@ -48,10 +48,10 @@ begin
      (Config, Log_File'Access, "-l:", "--log=",
       "Log program output to file (default: '" & Log_File.all & "')");
 
-   Define_Alias (Config, "-wsimpler1", "--wallet=SimpleR1");
-   Define_Alias (Config, "-wsimpler2", "--wallet=SimpleR2");
-   Define_Alias (Config, "-wsimpler3", "--wallet=SimpleR3");
-   Define_Alias (Config, "-wsimple", "--wallet=SimpleR3");
+   Define_Alias (Config, "-wsimpler1", "--wallet=Simple_R1");
+   Define_Alias (Config, "-wsimpler2", "--wallet=Simple_R2");
+   Define_Alias (Config, "-wsimpler3", "--wallet=Simple_R3");
+   Define_Alias (Config, "-wsimple", "--wallet=Simple_R3");
    Define_Alias (Config, "-wv2r1", "--wallet=V2_R1");
    Define_Alias (Config, "-wv2r2", "--wallet=V2_R2");
    Define_Alias (Config, "-wv2", "--wallet=V2_R2");
