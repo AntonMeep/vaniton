@@ -45,6 +45,7 @@ jobs:
         path: |
           bin/vaniton.exe
           bin/mnemonic2address.exe
+          bin/benchmark.exe
           bin/libcrypto-1_1-x64.dll
           README.md
           LICENSE.txt
@@ -53,7 +54,7 @@ jobs:
     # Release steps
     - name: Package binaries
       if: (github.event_name == 'release')
-      run: C:\msys64\usr\bin\zip vaniton-bin-windows.zip bin/vaniton.exe bin/mnemonic2address.exe bin/libcrypto-1_1-x64.dll README.md LICENSE.txt LICENSE.OpenSSL
+      run: C:\msys64\usr\bin\zip vaniton-bin-windows.zip bin/vaniton.exe bin/mnemonic2address.exe bin/benchmark.exe bin/libcrypto-1_1-x64.dll README.md LICENSE.txt LICENSE.OpenSSL
 
     - name: Retrieve upload URL for the release
       if: (github.event_name == 'release')

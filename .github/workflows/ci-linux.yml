@@ -35,13 +35,14 @@ jobs:
         path: |
           bin/vaniton
           bin/mnemonic2address
+          bin/benchmark
           README.md
           LICENSE.txt
     
     # Release steps
     - name: Package binaries
       if: (github.event_name == 'release')
-      run: zip vaniton-bin-linux.zip bin/vaniton bin/mnemonic2address README.md LICENSE.txt
+      run: zip vaniton-bin-linux.zip bin/vaniton bin/mnemonic2address bin/benchmark README.md LICENSE.txt
 
     - name: Retrieve upload URL for the release
       if: (github.event_name == 'release')
