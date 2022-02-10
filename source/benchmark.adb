@@ -47,7 +47,10 @@ begin
       Temporary  : Work_Unit;
       Taken      : Duration;
    begin
-      Put_Line ("[benchmark] Measuring address generation speed...");
+      Put_Line
+        (-
+         (+"[benchmark] Measuring address generation speed (%d iterations)..." &
+          Iterations));
       loop
          exit when Index = Iterations;
          Work_Queue.Dequeue (Temporary);
