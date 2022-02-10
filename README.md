@@ -35,6 +35,31 @@ Usage: vaniton.exe [switches] [pattern]
  -wv4                 Equivalent to --wallet=V4_R2
 ```
 
+# Pattern format
+Currently, program implements only a simple subset of regular expression patterns, here's a quick summary:
+
+| Expression | Description |
+|------------|-------------|
+| a|b        | Matches 'a' or 'b' |
+| ab         | Matches 'ab' |
+| a*         | Matches zero or more 'a's |
+| a+         | Matches one or more 'a's |
+| a?         | Matches one 'a' or nothing |
+| [ab]       | Matches 'a' or 'b' |
+| [^ab]      | Matches anything but 'a' or 'b' |
+| [a-c]      | Matches 'a' or 'b' or 'c' |
+| .          | Matches anything |
+| (abc)      | Grouping |
+
+Note, that patterns in **vaniton** match entire address string, and by default are case-insensitive (can be changed with `-c` switch).
+
+Here are some of the examples to get you started:
+```
+$ vaniton .*abc.*           # Match any address that has "abc" anywhere in it
+$ vaniton .*t[o0]n.*        # Match any address that has "ton" or "t0n" anywhere in it
+$ vaniton ..ual[i1]z[e3]r.* # Since first two characters are always "EQ", this would match addresses that start with "EQualizer", "EQual1z3r", "EQualiz3r", or "EQual1z3r"
+```
+
 # Safety
 This program utilizes same algorithms used by all TON wallets and relies on well-tested cryptography libraries such as OpenSSL and SPARKNaCl. While corners were certainly cut to improve overall performance, safety was not compromised.
 
