@@ -1,10 +1,13 @@
 pragma Ada_2012;
 
-with Ada.Containers;        use Ada.Containers;
-with Ada.Calendar;          use Ada.Calendar;
-with Ada.Text_IO;
+with Ada.Containers;          use Ada.Containers;
+with Ada.Calendar;            use Ada.Calendar;
+with Ada.Task_Identification; use Ada.Task_Identification;
+with Ada.Text_IO;             use Ada.Text_IO;
 with GNAT.Regexp;
-with GNAT.Formatted_String; use GNAT.Formatted_String;
+with GNAT.Formatted_String;   use GNAT.Formatted_String;
+
+with Interfaces; use Interfaces;
 
 with Addresses;
 with Cryptography;
@@ -25,6 +28,8 @@ package body Workers is
       Current    : Work_Unit;
       Kind       : Wallets.Wallet_Kind;
       Expression : Regexp;
+      Start_Time : Time;
+      Index      : Unsigned_64 := 1;
    begin
       accept Start
         (Wallet_Kind    : Wallets.Wallet_Kind; Pattern : String;
@@ -32,6 +37,7 @@ package body Workers is
       do
          Kind       := Wallet_Kind;
          Expression := Compile (Pattern, False, Case_Sensitive);
+         Start_Time := Clock;
       end Start;
 
       while not Control.Stop loop
@@ -45,17 +51,29 @@ package body Workers is
               Addresses.To_String
                 (Wallets.Get_Wallet_Address
                    (Public_Key => KP.Public_Key, Kind => Kind));
+
+            if Match (Current.Address, Expression) then
+               Work_Queue.Enqueue (Current);
+            end if;
          end;
 
-         if Match (Current.Address, Expression) then
-            Work_Queue.Enqueue (Current);
+         if (Index and Unsigned_64 (16#FFF#)) = 0 then
+            declare
+               Taken : constant Duration := Clock - Start_Time;
+            begin
+               Put_Line
+                 (Standard_Error,
+                  -(+"[%s] Last %d took %fs (%f addresses/sec)" &
+                   Image (Current_Task) & Integer (16#FFF#) & Taken &
+                   ((16#FFF# * 1.0) / Taken)));
+            end;
          end if;
+
+         Index := Index + 1;
       end loop;
    end Worker;
 
    task body Writer is
-      use Ada.Text_IO;
-
       Current : Work_Unit;
 
       type File_Access_Array is array (Positive range <>) of File_Access;
