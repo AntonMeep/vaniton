@@ -81,6 +81,7 @@ Tips on improving performance:
 - 1337. Try t0 s34rch f0r numb3rs t00
 
 Here's an example table that shows you how much time it takes to match N characters. Albeit time to match a certain set of characters is largely dependent on your luck, and these measures were made on a fairly slow virtual machine, this can give you a good idea on what to expect.
+You can used supplied `benchmark` tool to measure address generation speed of your machine.
 
 | N | Time (s) | How much longer? |
 |---|----------|------------------|
