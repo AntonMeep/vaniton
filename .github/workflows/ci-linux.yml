@@ -3,6 +3,8 @@ name: CI linux
 on:
   push:
     branches: [ master ]
+  release:
+    types: [created]
 
 jobs:
 
@@ -35,3 +37,31 @@ jobs:
           bin/mnemonic2address
           README.md
           LICENSE.txt
+    
+    # Release steps
+    - name: Package binaries
+      if: (github.event_name == 'release')
+      run: zip vaniton-bin-linux.zip bin/vaniton bin/mnemonic2address README.md LICENSE.txt
+
+    - name: Retrieve upload URL for the release
+      if: (github.event_name == 'release')
+      id: get_release
+      uses: bruceadams/get-release@v1.2.1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Get release version
+      if: (github.event_name == 'release')
+      id: get_version
+      uses: battila7/get-version-action@v2
+
+    - name: Upload binary assets
+      if: (github.event_name == 'release')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: vaniton-bin-linux.zip
+        asset_name: vaniton-${{ steps.get_version.outputs.version-without-v }}-bin-x86_64-linux.zip
+        asset_content_type: application/zip
