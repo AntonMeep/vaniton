@@ -32,5 +32,6 @@ jobs:
         name: vaniton-bin-linux.zip
         path: |
           bin/vaniton
+          bin/mnemonic2address
           README.md
           LICENSE.txt

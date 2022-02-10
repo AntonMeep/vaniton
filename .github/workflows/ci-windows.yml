@@ -42,6 +42,7 @@ jobs:
         name: vaniton-bin-windows.zip
         path: |
           bin/vaniton.exe
+          bin/mnemonic2address.exe
           bin/libcrypto-1_1-x64.dll
           README.md
           LICENSE.txt
