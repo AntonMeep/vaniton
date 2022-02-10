@@ -63,9 +63,9 @@ package body Workers is
             begin
                Put_Line
                  (Standard_Error,
-                  -(+"[%s] Last %d took %fs (%f addresses/sec)" &
-                   Image (Current_Task) & Integer (16#FFF#) & Taken &
-                   ((16#FFF# * 1.0) / Taken)));
+                  -(+"[%s] Progress so far: %s, last %d took %fs (%f addresses/sec)" &
+                   Image (Current_Task) & Index'Image & Integer (16#FFF#) &
+                   Taken & ((16#FFF# * 1.0) / Taken)));
             end;
          end if;
 
