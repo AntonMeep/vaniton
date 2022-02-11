@@ -72,6 +72,7 @@ package body Workers is
                   -(+"[%s] Progress so far: %s, last %d took %fs (%f addresses/sec)" &
                    Image (Current_Task) & Index'Image & Integer (16#FFF#) &
                    Taken & ((16#FFF# * 1.0) / Taken)));
+               Start_Time := Clock;
             end;
          end if;
 
