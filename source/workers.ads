@@ -29,6 +29,8 @@ package Workers is
       Flag_Stop : Boolean := False;
    end Control;
 
+   procedure Stop;
+
    task type Worker is
       entry Start
         (Wallet_Kind    : Wallets.Wallet_Kind; Pattern : String;

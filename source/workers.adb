@@ -22,6 +22,12 @@ package body Workers is
       function Stop return Boolean is (Flag_Stop);
    end Control;
 
+   procedure Stop is
+   begin
+      Put_Line (Standard_Error, "Exiting...");
+      Control.Signal_Stop;
+   end Stop;
+
    task body Worker is
       use GNAT.Regexp;
 
@@ -71,6 +77,7 @@ package body Workers is
 
          Index := Index + 1;
       end loop;
+      Put_Line (Standard_Error, -(+"[%s] Finished" & Image (Current_Task)));
    end Worker;
 
    task body Writer is
@@ -99,12 +106,16 @@ package body Workers is
       end select;
 
       while (not Control.Stop) or else (Work_Queue.Current_Use /= 0) loop
-         Work_Queue.Dequeue (Current);
+         if Work_Queue.Current_Use /= 0 then
+            Work_Queue.Dequeue (Current);
 
-         for File of Outputs_Array.all loop
-            Put_Line
-              (File.all, Current.Address & "|" & To_String (Current.Phrase));
-         end loop;
+            for File of Outputs_Array.all loop
+               Put_Line
+                 (File.all,
+                  Current.Address & "|" & To_String (Current.Phrase));
+            end loop;
+         end if;
       end loop;
+      Put_Line (Standard_Error, -(+"[%s] Finished" & Image (Current_Task)));
    end Writer;
 end Workers;

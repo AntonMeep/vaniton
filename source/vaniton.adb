@@ -1,6 +1,7 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
+with GNAT.Ctrl_C;       use GNAT.Ctrl_C;
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;      use GNAT.Strings;
 with GNAT.OS_Lib;
@@ -20,6 +21,8 @@ procedure Vaniton is
    Worker_Array : Worker_Array_Access := null;
    The_Writer   : Writer;
 begin
+   Install_Handler (Workers.Stop'Access);
+
    --!pp off
    Set_Usage
      (Config, Usage => "[switches] [pattern]",
@@ -78,18 +81,13 @@ begin
 
    The_Writer.Start (Log_File.all);
 
-   declare
-      Key       : Character;
-      Available : Boolean;
-   begin
-      Put_Line (Standard_Error, "[main] Press any key to exit");
-      while True loop
-         Ada.Text_IO.Get_Immediate (Key, Available);
-         exit when Available;
-      end loop;
-   end;
+   Put_Line (Standard_Error, "[main] Press Ctrl+C to exit");
+   loop
+      exit when Control.Stop;
+      delay 1.0;
+   end loop;
 
-   Control.Signal_Stop;
+   Put_Line (Standard_Error, "[main] All done!");
 exception
    when Exit_From_Command_Line =>
       GNAT.OS_Lib.OS_Exit (0); -- All chill
