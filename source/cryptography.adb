@@ -3,37 +3,60 @@ with Ada.Streams;
 with Interfaces.C;
 with Interfaces.C.Extensions;
 
+with System;
+
 with GNAT.SHA256; use GNAT.SHA256;
 
 with SPARKNaCl.Sign;
 with SPARKNaCl;
 
 with fastpbkdf2_h; use fastpbkdf2_h;
-with hmac_sha_c;
 
 package body Cryptography is
 
    function HMAC_SHA512 (Phrase : String; Password : String) return Byte_Array
    is
+      use System;
       use Interfaces.C;
       use Interfaces.C.Extensions;
 
       Phrase_Bytes   : aliased Byte_Array := To_Byte_Array (Phrase);
       Password_Bytes : aliased Byte_Array := To_Byte_Array (Password);
 
-      Result : aliased Byte_Array (1 .. 64);
+      Result  : aliased Byte_Array (1 .. 64);
+      Written : aliased size_t := 0;
+
+      function EVP_sha512 return void_ptr with
+         Import        => True,
+         Convention    => C,
+         External_Name => "EVP_sha512";
+
+      function HMAC
+        (evp_md  : void_ptr; key : access Interfaces.Unsigned_8;
+         key_len : size_t; d : access Interfaces.Unsigned_8; n : size_t;
+         md      : access Interfaces.Unsigned_8; md_len : access size_t)
+         return void_ptr with
+         Import        => True,
+         Convention    => C,
+         External_Name => "HMAC";
    begin
       if Password'Length /= 0 then
          Password_Bytes := To_Byte_Array (Password);
       end if;
 
-      if not hmac_sha_c.hmac_sha512
-          (Phrase_Bytes (Phrase_Bytes'First)'Access, Phrase_Bytes'Length,
+      if HMAC
+          (EVP_sha512, Phrase_Bytes (Phrase_Bytes'First)'Access,
+           Phrase_Bytes'Length,
            (if Password'Length /= 0 then
               Password_Bytes (Password_Bytes'First)'Access
             else null),
-           Password'Length, Result (1)'Access, Result'Length)
+           Password'Length, Result (1)'Access, Written'Access) =
+        Null_Address
       then
+         raise Program_Error;
+      end if;
+
+      if Written /= Result'Length then
          raise Program_Error;
       end if;
 
