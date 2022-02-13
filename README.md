@@ -85,10 +85,10 @@ You can used supplied `benchmark` tool to measure address generation speed of yo
 
 | N | Time (s) | How much longer? |
 |---|----------|------------------|
-| 1 |      0.2 |                - |
-| 2 |      7.7 |            3.85x |
-| 3 |   1663.9 |          213.32x |
-| 4 |   5295.3 |            3.12x |
+| 1 |      0.1 |                - |
+| 2 |      3.9 |              39x |
+| 3 |    595.6 |             153x |
+| 4 |  17441.6 |              29x |
 
 
 # Wallet contract versions
