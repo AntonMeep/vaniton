@@ -106,17 +106,17 @@ package body Cryptography is
    function Is_Password_Needed (Entropy : Byte_Array) return Boolean is
      (Is_Password_Seed (Entropy) and not Is_Basic_Seed (Entropy));
 
-   function Get_Random return Unsigned_32 is
-      use Interfaces.C;
+   use Interfaces.C;
+   type uchar_array is array (Natural range <>) of aliased unsigned_char;
 
-      type uchar_array is array (Natural range <>) of aliased unsigned_char;
+   function RAND_bytes (buf : access unsigned_char; num : int) return int with
+      Import        => True,
+      Convention    => C,
+      External_Name => "RAND_bytes";
+
+   function Get_Random return Unsigned_32 is
       Buffer : uchar_array (0 .. 3);
 
-      function RAND_bytes
-        (buf : access unsigned_char; num : int) return int with
-         Import        => True,
-         Convention    => C,
-         External_Name => "RAND_bytes";
       function To_Unsigned_32 is new Ada.Unchecked_Conversion
         (uchar_array, Unsigned_32);
    begin
@@ -124,5 +124,19 @@ package body Cryptography is
          raise Program_Error;
       end if;
       return To_Unsigned_32 (Buffer);
+   end Get_Random;
+
+   function Get_Random (Length : Positive) return Unsigned_16_Array is
+      subtype Result_Type is Unsigned_16_Array (1 .. Length);
+
+      Buffer : uchar_array (0 .. Length * 2 - 1);
+
+      function To_Unsigned_16_Array is new Ada.Unchecked_Conversion
+        (uchar_array, Result_Type);
+   begin
+      if RAND_bytes (Buffer (0)'Access, Buffer'Length) /= 1 then
+         raise Program_Error;
+      end if;
+      return To_Unsigned_16_Array (Buffer);
    end Get_Random;
 end Cryptography;

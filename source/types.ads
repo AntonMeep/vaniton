@@ -9,6 +9,7 @@ package Types is
    pragma Pack (Bit_Array);
    type Byte_Array is array (Natural range <>) of aliased Unsigned_8;
 
+   type Unsigned_16_Array is array (Natural range <>) of Unsigned_16;
    type Unsigned_32_Array is array (Natural range <>) of Unsigned_32;
 
    function To_Byte_Array (Item : in String) return Byte_Array;

@@ -8,6 +8,7 @@ package body Mnemonics is
       List        : Wordlist := English_Words) return Mnemonic
    is
       Result : Mnemonic (1 .. Words_Count);
+
       function Check_Validity return Boolean;
 
       function Check_Validity return Boolean is
@@ -21,10 +22,14 @@ package body Mnemonics is
       end Check_Validity;
    begin
       loop
-         for I in Result'Range loop
-            Result (I) :=
-              List (Natural (Get_Random and Unsigned_32 (List'Last)));
-         end loop;
+         declare
+            Random : constant Unsigned_16_Array := Get_Random (Words_Count);
+         begin
+            for I in Result'Range loop
+               Result (I) :=
+                 List (Natural (Random (I) and Unsigned_16 (List'Last)));
+            end loop;
+         end;
 
          exit when Check_Validity;
       end loop;

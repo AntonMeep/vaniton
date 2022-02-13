@@ -23,4 +23,5 @@ package Cryptography is
    function Is_Password_Needed (Entropy : Byte_Array) return Boolean;
 
    function Get_Random return Unsigned_32;
+   function Get_Random (Length : Positive) return Unsigned_16_Array;
 end Cryptography;
