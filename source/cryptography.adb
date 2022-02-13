@@ -10,8 +10,6 @@ with GNAT.SHA256; use GNAT.SHA256;
 with SPARKNaCl.Sign;
 with SPARKNaCl;
 
-with fastpbkdf2_h; use fastpbkdf2_h;
-
 package body Cryptography is
 
    function HMAC_SHA512 (Phrase : String; Password : String) return Byte_Array
@@ -66,10 +64,20 @@ package body Cryptography is
    function PBKDF2_SHA512
      (Key : Byte_Array; Salt : String; Iterations : Positive) return Byte_Array
    is
+      use Interfaces.C;
+
       Salt_Bytes : aliased Byte_Array := To_Byte_Array (Salt);
       Key_Copy   : aliased Byte_Array := Key;
 
       Result : aliased Byte_Array (1 .. 64);
+
+      procedure fastpbkdf2_hmac_sha512
+        (pw    : access Unsigned_8; npw : size_t; salt_1 : access Unsigned_8;
+         nsalt : size_t; iterations_1 : Unsigned_32; c_out : access Unsigned_8;
+         nout  : size_t) with
+         Import        => True,
+         Convention    => C,
+         External_Name => "fastpbkdf2_hmac_sha512";
    begin
       fastpbkdf2_hmac_sha512
         (Key_Copy (Key_Copy'First)'Access, Key_Copy'Length,
