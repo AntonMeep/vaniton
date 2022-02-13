@@ -2,6 +2,7 @@ pragma Ada_2012;
 
 with Ada.Containers;          use Ada.Containers;
 with Ada.Calendar;            use Ada.Calendar;
+with Ada.Directories;
 with Ada.Task_Identification; use Ada.Task_Identification;
 with Ada.Text_IO;             use Ada.Text_IO;
 with GNAT.Regexp;
@@ -96,21 +97,19 @@ package body Workers is
                Outputs_Array         := new File_Access_Array (1 .. 1);
                Outputs_Array.all (1) := Standard_Output;
             else
-               declare
-               begin
+               if Ada.Directories.Exist (File_Name) then
                   Put_Line
                     (Standard_Error,
                      -(+"[%s] Logging program output to %s" &
                       Image (Current_Task) & File_Name));
                   Open (Output_File, Append_File, File_Name);
-               exception
-                  when Name_Error =>
-                     Put_Line
-                       (Standard_Error,
-                        -(+"[%s] File %s does not exist, creating a new one" &
-                         Image (Current_Task) & File_Name));
-                     Create (Output_File, Append_File, File_Name);
-               end;
+               else
+                  Put_Line
+                    (Standard_Error,
+                     -(+"[%s] Log file %s does not exist, creating a new one" &
+                      Image (Current_Task) & File_Name));
+                  Create (Output_File, Append_File, File_Name);
+               end if;
 
                Outputs_Array         := new File_Access_Array (1 .. 2);
                Outputs_Array.all (1) := Standard_Output;
