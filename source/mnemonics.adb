@@ -132,4 +132,16 @@ package body Mnemonics is
    function To_Key_Pair
      (This : Mnemonic; Password : String := "") return Key_Pair is
      (From_Seed (To_Seed (This, Password)));
+
+   function Is_Basic_Seed (Entropy : Byte_Array) return Boolean is
+     (PBKDF2_SHA512
+        (Entropy, "TON seed version",
+         Natural'Max
+           (1, Natural (Float'Floor (Float (PBKDF_ITERATIONS) / 256.0))))
+        (1) =
+      0);
+   function Is_Password_Seed (Entropy : Byte_Array) return Boolean is
+     (PBKDF2_SHA512 (Entropy, "TON fast seed version", 1) (1) = 1);
+   function Is_Password_Needed (Entropy : Byte_Array) return Boolean is
+     (Is_Password_Seed (Entropy) and not Is_Basic_Seed (Entropy));
 end Mnemonics;

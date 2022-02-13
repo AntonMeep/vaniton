@@ -19,4 +19,7 @@ package Mnemonics is
      (This : Mnemonic; Password : String := "") return Byte_Array;
    function To_Key_Pair
      (This : Mnemonic; Password : String := "") return Key_Pair;
+   function Is_Basic_Seed (Entropy : Byte_Array) return Boolean;
+   function Is_Password_Seed (Entropy : Byte_Array) return Boolean;
+   function Is_Password_Needed (Entropy : Byte_Array) return Boolean;
 end Mnemonics;

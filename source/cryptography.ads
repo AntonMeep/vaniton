@@ -18,10 +18,6 @@ package Cryptography is
 
    function From_Seed (Seed : Byte_Array) return Key_Pair;
 
-   function Is_Basic_Seed (Entropy : Byte_Array) return Boolean;
-   function Is_Password_Seed (Entropy : Byte_Array) return Boolean;
-   function Is_Password_Needed (Entropy : Byte_Array) return Boolean;
-
    function Get_Random return Unsigned_32;
    function Get_Random (Length : Positive) return Unsigned_16_Array;
 end Cryptography;

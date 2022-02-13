@@ -94,18 +94,6 @@ package body Cryptography is
       return Result;
    end From_Seed;
 
-   function Is_Basic_Seed (Entropy : Byte_Array) return Boolean is
-     (PBKDF2_SHA512
-        (Entropy, "TON seed version",
-         Natural'Max
-           (1, Natural (Float'Floor (Float (PBKDF_ITERATIONS) / 256.0))))
-        (1) =
-      0);
-   function Is_Password_Seed (Entropy : Byte_Array) return Boolean is
-     (PBKDF2_SHA512 (Entropy, "TON fast seed version", 1) (1) = 1);
-   function Is_Password_Needed (Entropy : Byte_Array) return Boolean is
-     (Is_Password_Seed (Entropy) and not Is_Basic_Seed (Entropy));
-
    use Interfaces.C;
    type uchar_array is array (Natural range <>) of aliased unsigned_char;
 
