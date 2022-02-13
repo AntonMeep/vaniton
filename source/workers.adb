@@ -69,7 +69,7 @@ package body Workers is
             begin
                Put_Line
                  (Standard_Error,
-                  -(+"[%s] Progress so far: %s, last %d took %fs (%f addresses/sec)" &
+                  -(+"[%s] Progress: %s, last %d took %fs (%f addr/sec)" &
                    Image (Current_Task) & Index'Image & Integer (16#FFF#) &
                    Taken & ((16#FFF# * 1.0) / Taken)));
                Start_Time := Clock;
@@ -85,7 +85,8 @@ package body Workers is
       Current : Work_Unit;
 
       type File_Access_Array is array (Positive range <>) of File_Access;
-      Outputs_Array : access File_Access_Array;
+      type File_Access_Array_Access is access File_Access_Array;
+      Outputs_Array : File_Access_Array_Access;
 
       Output_File : aliased File_Type;
    begin
@@ -95,7 +96,21 @@ package body Workers is
                Outputs_Array         := new File_Access_Array (1 .. 1);
                Outputs_Array.all (1) := Standard_Output;
             else
-               Create (Output_File, Append_File, File_Name);
+               declare
+               begin
+                  Put_Line
+                    (Standard_Error,
+                     -(+"[%s] Logging program output to %s" &
+                      Image (Current_Task) & File_Name));
+                  Open (Output_File, Append_File, File_Name);
+               exception
+                  when Name_Error =>
+                     Put_Line
+                       (Standard_Error,
+                        -(+"[%s] File %s does not exist, creating a new one" &
+                         Image (Current_Task) & File_Name));
+                     Create (Output_File, Append_File, File_Name);
+               end;
 
                Outputs_Array         := new File_Access_Array (1 .. 2);
                Outputs_Array.all (1) := Standard_Output;
@@ -117,6 +132,8 @@ package body Workers is
             end loop;
          end if;
       end loop;
+
+      Close (Output_File);
       Put_Line (Standard_Error, -(+"[%s] Finished" & Image (Current_Task)));
    end Writer;
 end Workers;
