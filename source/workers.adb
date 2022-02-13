@@ -97,7 +97,7 @@ package body Workers is
                Outputs_Array         := new File_Access_Array (1 .. 1);
                Outputs_Array.all (1) := Standard_Output;
             else
-               if Ada.Directories.Exist (File_Name) then
+               if Ada.Directories.Exists (File_Name) then
                   Put_Line
                     (Standard_Error,
                      -(+"[%s] Logging program output to %s" &
