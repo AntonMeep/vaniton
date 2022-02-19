@@ -57,7 +57,7 @@ Here are some of the examples to get you started:
 ```
 $ vaniton .*abc.*           # Match any address that has "abc" anywhere in it
 $ vaniton .*t[o0]n.*        # Match any address that has "ton" or "t0n" anywhere in it
-$ vaniton ..ual[i1]z[e3]r.* # Since first two characters are always "EQ", this would match addresses that start with "EQualizer", "EQual1z3r", "EQualiz3r", or "EQual1z3r"
+$ vaniton ..al[i1]z[e3]r.* # Since first two characters are always "EQ" and third character is [ABCD], this would match addresses that start with "EQalizer", "EQal1z3r", "EQaliz3r", or "EQal1z3r"
 ```
 
 # Safety
