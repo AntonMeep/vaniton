@@ -33,7 +33,10 @@ package Workers is
 
    task type Worker is
       entry Start
-        (Wallet_Kind    : Wallets.Wallet_Kind; Pattern : String;
+        (Kind    : Wallets.Wallet_Kind; 
+         Test_Only : Boolean;
+         Bounceable : Boolean;
+         Pattern : String;
          Case_Sensitive : Boolean);
    end Worker;
 

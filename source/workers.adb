@@ -34,15 +34,22 @@ package body Workers is
 
       Current    : Work_Unit;
       Kind       : Wallets.Wallet_Kind;
+      Test_Only : Boolean;
+      Bounceable : Boolean;
       Expression : Regexp;
       Start_Time : Time;
       Index      : Unsigned_64 := 1;
    begin
       accept Start
-        (Wallet_Kind    : Wallets.Wallet_Kind; Pattern : String;
+        (Kind    : Wallets.Wallet_Kind; 
+         Test_Only      : Boolean;
+         Bounceable     : Boolean;
+         Pattern : String;
          Case_Sensitive : Boolean)
       do
-         Kind       := Wallet_Kind;
+         Worker.Kind       := Kind;
+         Worker.Test_Only := Test_Only;
+         Worker.Bounceable := Bounceable;
          Expression := Compile (Pattern, False, Case_Sensitive);
          Start_Time := Clock;
       end Start;
@@ -57,7 +64,8 @@ package body Workers is
             Current.Address :=
               Addresses.To_String
                 (Wallets.Get_Wallet_Address
-                   (Public_Key => KP.Public_Key, Kind => Kind));
+                   (Public_Key => KP.Public_Key, Kind => Kind, Test_Only => Test_Only,
+                    Bounceable => Bounceable));
 
             if Match (Current.Address, Expression) then
                Work_Queue.Enqueue (Current);

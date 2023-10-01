@@ -15,6 +15,8 @@ procedure Vaniton is
    Wallet_Kind_String : aliased String_Access := new String'("V3_R2");
    Case_Sensitive     : aliased Boolean       := False;
    Log_File           : aliased String_Access := new String'("");
+   Test_Only          : aliased Boolean       := False;
+   Bounceable         : aliased Boolean       := True;
 
    type Worker_Array_Type is array (Natural range <>) of Worker;
    type Worker_Array_Access is access all Worker_Array_Type;
@@ -46,10 +48,20 @@ begin
       "Wallet version to use (default: " & Wallet_Kind_String.all & ")");
    Define_Switch
      (Config, Case_Sensitive'Access, "-c", "--case-sensitive",
-      "Match case-sensitive (default: " & Case_Sensitive'Img & ")");
+      "Match case-sensitive (default: " & Case_Sensitive'Img & ")", "",
+      not Case_Sensitive);
    Define_Switch
      (Config, Log_File'Access, "-l:", "--log=",
       "Log program output to file (default: '" & Log_File.all & "')");
+   Define_Switch
+     (Config, Test_Only'Access, "-t", "--test-only",
+      "Generate mainnet/test-only addresses (default: " & Test_Only'Img & ")",
+      "", not Test_Only);
+   Define_Switch
+     (Config, Bounceable'Access, "-b", "--bounceable",
+      "Generate bounceable/non-bounceable addresses (default: " &
+      Bounceable'Img & ")",
+      "", not Bounceable);
 
    Define_Alias (Config, "-wsimpler1", "--wallet=Simple_R1");
    Define_Alias (Config, "-wsimpler2", "--wallet=Simple_R2");
@@ -75,7 +87,8 @@ begin
       Worker_Array :=
         new Worker_Array_Type (0 .. Natural (Number_Of_Workers) - 1);
       for I in Worker_Array.all'Range loop
-         Worker_Array.all (I).Start (Wallet_Kind, Pattern, Case_Sensitive);
+         Worker_Array.all (I).Start
+           (Wallet_Kind, Test_Only, Bounceable, Pattern, Case_Sensitive);
       end loop;
    end;
 
@@ -91,7 +104,7 @@ begin
 exception
    when Exit_From_Command_Line =>
       GNAT.OS_Lib.OS_Exit (0); -- All chill
-   when Error : others =>
+   when Error : others         =>
       Put (Exception_Information (Error));
       GNAT.OS_Lib.OS_Exit (-1);
 end Vaniton;

@@ -104,7 +104,8 @@ package body Wallets is
 
    function Get_Wallet_Address
      (Public_Key : Byte_Array; Workchain : Integer_8 := 0;
-      Kind       : Wallet_Kind := V3_R2) return Address
+      Kind       : Wallet_Kind := V3_R2; Test_Only : Boolean := False;
+      Bounceable : Boolean     := True) return Address
    is
       Result : Address;
 
@@ -161,7 +162,7 @@ package body Wallets is
       Append_Reference (State_Init, Code);
       Append_Reference (State_Init, Data);
 
-      Result := Create (False, True, Workchain, Hash (State_Init));
+      Result := Create (Test_Only, Bounceable, Workchain, Hash (State_Init));
 
       return Result;
    end Get_Wallet_Address;

@@ -38,7 +38,7 @@ begin
    Worker_Array :=
      new Worker_Array_Type (0 .. Natural (Number_Of_Workers) - 1);
    for I in Worker_Array.all'Range loop
-      Worker_Array.all (I).Start (Wallets.V3_R2, "", False);
+      Worker_Array.all (I).Start (Wallets.V3_R2, False, True, "", False);
    end loop;
 
    declare
@@ -108,7 +108,7 @@ begin
 exception
    when Exit_From_Command_Line =>
       GNAT.OS_Lib.OS_Exit (0); -- All chill
-   when Error : others =>
+   when Error : others         =>
       Put (Exception_Information (Error));
       GNAT.OS_Lib.OS_Exit (-1);
 end Benchmark;

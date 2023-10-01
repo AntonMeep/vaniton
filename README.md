@@ -1,4 +1,5 @@
-vaniton ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AntonMeep/vaniton/CI%20linux) ![GitHub](https://img.shields.io/github/license/AntonMeep/vaniton) ![Donation address](https://img.shields.io/badge/donate%20TON-EQAnTon5VVNKup8v0EUT0SvCKsRmEpotr__3eSpqYJTneIVht%20-blue)
+vaniton ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/AntonMeep/vaniton/ci-linux.yml
+) ![GitHub](https://img.shields.io/github/license/AntonMeep/vaniton) ![Donation address](https://img.shields.io/badge/donate%20TON-EQAnTon5VVNKup8v0EUT0SvCKsRmEpotr__3eSpqYJTneIVht%20-blue)
 =======
 
 **vaniton** is a vanity wallet address generator for [The Open Network's](https://ton.org/) blockchain. Currently it supports all major versions of wallet smart contracts you could encounter (from SimpleR1 to V4R2).
@@ -20,6 +21,8 @@ Usage: vaniton.exe [switches] [pattern]
  -w, --wallet=ARG     Wallet version to use (default: V3_R2)
  -c, --case-sensitive Match case-sensitive (default: FALSE)
  -l, --log=ARG        Log program output to file (default: '')
+ -t, --test-only      Generate mainnet/test-only addresses (default: FALSE)
+ -b, --bounceable     Generate bounceable/non-bounceable addresses (default: TRUE)
  -wsimpler1           Equivalent to --wallet=Simple_R1
  -wsimpler2           Equivalent to --wallet=Simple_R2
  -wsimpler3           Equivalent to --wallet=Simple_R3
